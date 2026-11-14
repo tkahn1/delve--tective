@@ -1,0 +1,116 @@
+:root {
+  --ink: #18181b;
+  --secondary: #3f3f46;
+  --secondary-2: #52525b;
+  --dimmed: #71717a;
+  --border: #e4e4e7;
+  --soft: #f4f4f5;
+  --flag: #ea580c;
+  --flag-text: #7c2d12;
+  --flag-tint: #fff7ed;
+  --link: #1d4ed8;
+  --heading: 'Space Grotesk', 'Inter', system-ui, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: #fff;
+}
+
+body {
+  width: 380px;
+  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font-size: 14px;
+  line-height: 1.4;
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+.popup { display: flex; flex-direction: column; }
+
+.row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+
+.section {
+  padding: 18px 20px;
+  border-top: 1px solid var(--border);
+}
+
+/* Header */
+.header { padding: 14px 20px; min-height: 60px; }
+.brand { display: flex; align-items: center; gap: 10px; }
+.logo { display: inline-flex; width: 28px; height: 28px; }
+.name { font-family: var(--heading); font-weight: 700; font-size: 18px; letter-spacing: -0.01em; }
+
+/* Switch */
+.switch { position: relative; display: inline-flex; align-items: center; min-height: 44px; cursor: pointer; flex-shrink: 0; }
+.switch input { position: absolute; opacity: 0; width: 1px; height: 1px; margin: 0; }
+.switch .track {
+  width: 48px; height: 28px; border-radius: 999px;
+  background: var(--border);
+  position: relative; transition: background 0.15s;
+}
+.switch .thumb {
+  position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%;
+  background: #fff; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2); transition: transform 0.15s;
+}
+.switch input:checked + .track { background: var(--ink); }
+.switch input:checked + .track .thumb { transform: translateX(20px); }
+.switch input:focus-visible + .track { outline: 2px solid var(--link); outline-offset: 2px; }
+
+/* This page */
+.label {
+  font-size: 11px; font-weight: 600; letter-spacing: 0.08em; color: var(--secondary-2);
+  margin-bottom: 8px;
+}
+.headline {
+  font-family: var(--heading); font-weight: 700; font-size: 24px; letter-spacing: -0.01em;
+  margin: 0 0 12px;
+}
+.meter { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; margin-bottom: 14px; }
+.seg { height: 6px; border-radius: 999px; background: var(--border); }
+.seg.on { background: var(--flag); }
+.reasons { list-style: none; margin: 0; padding: 0; color: var(--secondary); }
+.reasons li { padding: 3px 0; }
+.clean { margin: 4px 0 0; color: var(--secondary); }
+.muted { margin: 4px 0 0; color: var(--dimmed); }
+
+/* Settings */
+.field-title { font-weight: 500; margin-bottom: 8px; }
+.segmented {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 4px;
+  background: var(--soft); border-radius: 7px; padding: 4px;
+}
+.segmented button {
+  font: inherit; color: var(--secondary-2); background: transparent; border: 0;
+  border-radius: 6px; min-height: 40px; cursor: pointer;
+}
+.segmented button.active {
+  background: #fff; color: var(--ink); font-weight: 600;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+.segmented button:focus-visible { outline: 2px solid var(--link); outline-offset: 1px; }
+
+.site-row { margin-top: 14px; }
+.site-text { min-width: 0; }
+.site-title { font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.helper { display: block; font-size: 12px; color: var(--dimmed); }
+
+/* Counts */
+.counts { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.big { font-family: var(--heading); font-weight: 700; font-size: 26px; line-height: 1.1; }
+.count-label { font-size: 12px; color: var(--secondary-2); margin-top: 2px; }
+
+/* Link row */
+.link-row {
+  width: 100%; font: inherit; color: inherit; text-align: left; background: #fff;
+  border: 0; border-top: 1px solid var(--border); cursor: pointer; min-height: 64px;
+}
+.link-row:hover { background: var(--soft); }
+.link-row:focus-visible { outline: 2px solid var(--link); outline-offset: -2px; }
+.link-title { display: block; font-weight: 600; }
+.chevron { display: inline-flex; color: var(--secondary-2); }
+
+body.off #this-page { opacity: 0.6; }

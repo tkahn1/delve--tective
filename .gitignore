@@ -1,0 +1,10 @@
+# Added by the pipeline agent (root had no .gitignore)
+node_modules/
+dist/
+.env
+.env.*
+!.env.example
+extension/public/models/
+eval/data/
+__pycache__/
+*.pyc

@@ -1,0 +1,5 @@
+# Test sets can be large and have their own licences: keep them local.
+data/
+*.jsonl
+*.parquet
+*.csv

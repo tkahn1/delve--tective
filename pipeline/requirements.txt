@@ -1,0 +1,14 @@
+# build_sitelist.py and build_fingerprints.py need only the standard library (Python 3.10+).
+
+# fetch_model.py
+huggingface_hub>=0.24
+
+# eval.py (layer B on the same ONNX file the browser loads)
+onnxruntime>=1.18
+tokenizers>=0.19
+numpy>=1.26
+
+# export_onnx.py (fallback: build the ONNX model yourself; large install)
+optimum[onnxruntime]>=1.21
+transformers>=4.41
+torch>=2.2

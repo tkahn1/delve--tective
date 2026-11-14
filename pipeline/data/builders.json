@@ -1,0 +1,4 @@
+{
+  "generators": ["durable", "mixo", "10web", "b12", "codedesign", "dorik", "unicorn platform", "unicornplatform", "hostinger ai", "zyro", "framer ai", "wix ai", "relume", "typedream", "softr", "landingsite"],
+  "scriptHosts": ["durable.co", "durablesites.com", "mixo.io", "10web.io", "10web.site", "b12.io", "b12sites.com", "codedesign.ai", "dorik.com", "dorik.io", "unicornplatform.com", "unicornplatform.page", "zyrosite.com", "typedream.app", "landingsite.ai"]
+}

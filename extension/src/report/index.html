@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Unslop weekly report</title>
+  </head>
+  <body>
+    <main class="report">
+      <header class="top">
+        <h1 id="title">Your weekly report</h1>
+        <div class="segmented" role="radiogroup" aria-label="Time range">
+          <button type="button" role="radio" data-range="week">This week</button>
+          <button type="button" role="radio" data-range="month">Month</button>
+          <button type="button" role="radio" data-range="all">All time</button>
+        </div>
+      </header>
+
+      <div id="content"></div>
+
+      <footer class="foot">Counted on this device only. These numbers are never sent anywhere.</footer>
+    </main>
+    <script type="module" src="./report.ts"></script>
+  </body>
+</html>
