@@ -331,7 +331,8 @@ function renderCopies(st: CopiesStatus | null): void {
     !!st.fetch.lastStatus && st.fetch.lastStatus >= 400);
   if (st.fetch.lastError) row('Last error', st.fetch.lastError, true);
   row('Groups', `${n(st.groups)} (${n(st.inGroups)} comments, largest ${n(st.biggest)})`);
-  row('Flagged at sensitivity', `${n(st.repeatGroups)} groups, ${n(st.repeats)} comments (${settings.sensitivity ?? 'balanced'})`);
+  const sensLabel = { relaxed: 'Less', balanced: 'Normal', strict: 'More' }[settings.sensitivity ?? 'balanced'];
+  row('Flagged at sensitivity', `${n(st.repeatGroups)} groups, ${n(st.repeats)} comments (${sensLabel})`);
   row('Grouping', `${n(st.lastGroupMs)} ms last pass`);
   row('On the page', `${n(st.onPage)} comments, ${n(st.withId)} with ids`, st.onPage > 0 && st.withId === 0);
   row('Flags', `${n(st.flagged)} of ${n(st.inGroupsOnPage)} in groups` + (st.noHeader ? `, ${n(st.noHeader)} with no place` : ''),
