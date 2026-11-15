@@ -43,7 +43,7 @@ export function createBadge(opts: { onSeeAll(): void; onClose(): void }): Badge 
         return;
       }
       const hasLevel = v.level === 'medium' || v.level === 'high';
-      title.textContent = hasLevel ? `Second look: ${capitalize(v.level as string)}` : 'Unslop';
+      title.textContent = hasLevel ? `Second look: ${capitalize(v.level as string)}` : 'delve—tective';
       title.parentElement!.hidden = false;
       meter.hidden = !hasLevel;
       segs.forEach((s, i) => s.classList.toggle('on', i < v.segments));

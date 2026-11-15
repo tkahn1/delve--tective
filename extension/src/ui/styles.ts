@@ -2,16 +2,16 @@
 // except PAGE_CSS which restyles Google's own result elements).
 
 export const C = {
-  ink: '#18181B',
-  secondary: '#3F3F46',
-  secondary2: '#52525B',
-  dimmed: '#71717A',
-  border: '#E4E4E7',
-  soft: '#F4F4F5',
-  flag: '#EA580C',
-  flagText: '#7C2D12',
-  flagTint: '#FFF7ED',
-  link: '#1D4ED8',
+  ink: '#29231f',
+  secondary: '#4e443b',
+  secondary2: '#63564b',
+  dimmed: '#706358',
+  border: '#ded5c8',
+  soft: '#eee8de',
+  flag: '#8c5c38',
+  flagText: '#674329',
+  flagTint: '#f3eadb',
+  link: '#744e32',
 } as const;
 
 export const FONT_BODY = `'UnslopInter', Inter, system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif`;
@@ -67,7 +67,7 @@ export const TOOLTIP_CSS = `
   padding: 12px 14px; box-shadow: 0 8px 24px rgba(0,0,0,.18); pointer-events: none; font-size: 12px; line-height: 1.45; }
 .tip[hidden] { display: none; }
 .tip .t { font-family: ${FONT_HEAD}; font-weight: 600; font-size: 13px; margin: 0 0 6px; color: #FFFFFF; }
-.tip .why { color: #E4E4E7; margin: 0 0 4px; }
+.tip .why { color: #ded5c8; margin: 0 0 4px; }
 .tip ul { list-style: none; margin: 0 0 8px; padding: 0; }
 .tip li { margin: 2px 0; color: #FFFFFF; }
 .tip li::before { content: '\\00B7'; margin-right: 6px; }

@@ -53,7 +53,7 @@ function renderPage(state: TabState | null): void {
   body.replaceChildren();
 
   if (!settings.enabled) {
-    body.appendChild(el('p', 'muted', 'Unslop is off.'));
+    body.appendChild(el('p', 'muted', 'delve—tective is off.'));
     return;
   }
   if (siteDomain && settings.disabledSites.includes(siteDomain)) {
@@ -73,7 +73,11 @@ function renderPage(state: TabState | null): void {
     return;
   }
 
-  if (!state || !state.level || state.level === 'low' && !state.reasons.length) {
+  if (!state) {
+    body.appendChild(el('p', 'muted', 'No page check available. Refresh the page to try again.'));
+    return;
+  }
+  if (!state.level || state.level === 'low' && !state.reasons.length) {
     body.appendChild(el('p', 'clean', 'Nothing flagged on this page.'));
     return;
   }

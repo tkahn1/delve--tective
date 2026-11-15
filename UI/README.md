@@ -13,6 +13,7 @@ python -m http.server 8080
 Open **http://localhost:8080/UI/**.
 
 - `article-highlights.html`: article with phrase highlights, matching-text evidence, a paragraph-model explanation, dismiss controls, and keyboard support.
+- `palette-studio.html`: live dashboard palette editor with three starting palettes, native colour pickers, editable hex values, contrast checks, browser-local persistence, and CSS export. Changes affect previews only.
 - `dashboard.html`: Quiet dashboard with working week/month/all-time controls. It uses the extension's **actual `summarize(Stats, range, now)` function**, bundled in `assets/stats.js`, and explicitly labeled sample data in `sample-data.js`.
 - `directions.html`: all previously reviewed Search, Article, Popup, and Activity samples, with Quiet/Margin/Inspector alternatives. Quiet is the chosen starting point.
 - `sources/`: editable original conversation fragments used to export the two standalone previews.

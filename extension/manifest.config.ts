@@ -10,13 +10,13 @@ const icons = {
 
 export default defineManifest({
   manifest_version: 3,
-  name: 'Unslop',
+  name: 'delve—tective',
   description: 'Dims search results and outlines paragraphs that are worth a second look.',
   version: pkg.version,
   icons,
   action: {
     default_popup: 'src/popup/index.html',
-    default_title: 'Unslop',
+    default_title: 'delve—tective',
     default_icon: icons,
   },
   background: {

@@ -1,20 +1,20 @@
 :root {
-  --ink: #18181b;
-  --secondary: #3f3f46;
-  --secondary-2: #52525b;
-  --dimmed: #71717a;
-  --border: #e4e4e7;
-  --soft: #f4f4f5;
-  --flag: #ea580c;
-  --flag-text: #7c2d12;
-  --flag-tint: #fff7ed;
-  --link: #1d4ed8;
-  --heading: 'Space Grotesk', 'Inter', system-ui, sans-serif;
+  --ink: #29231f;
+  --secondary: #4e443b;
+  --secondary-2: #63564b;
+  --dimmed: #706358;
+  --border: #ded5c8;
+  --soft: #eee8de;
+  --flag: #8c5c38;
+  --flag-text: #674329;
+  --flag-tint: #f3eadb;
+  --link: #744e32;
+  --heading: 'Inter', system-ui, sans-serif;
 }
 
 * { box-sizing: border-box; }
 
-html, body { margin: 0; padding: 0; background: #fff; }
+html, body { margin: 0; padding: 0; background: #faf7f1; }
 
 body {
   font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
@@ -35,7 +35,7 @@ h2 { font-size: 14px; font-weight: 600; margin: 0 0 14px; }
   font: inherit; font-size: 13px; color: var(--secondary-2); background: transparent; border: 0;
   border-radius: 6px; padding: 0 14px; min-height: 36px; cursor: pointer;
 }
-.segmented button.active { background: #fff; color: var(--ink); font-weight: 600; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08); }
+.segmented button.active { background: #faf7f1; color: var(--ink); font-weight: 600; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08); }
 .segmented button:focus-visible { outline: 2px solid var(--link); outline-offset: 1px; }
 
 /* Totals */
@@ -84,3 +84,4 @@ h2 { font-size: 14px; font-weight: 600; margin: 0 0 14px; }
   .why-row { grid-template-columns: 1fr 40px; }
   .why-track { grid-column: 1 / -1; grid-row: 2; }
 }
+.report{max-width:880px;padding-top:36px}h1{font-family:Georgia,'Times New Roman',serif;font-size:28px;font-weight:500}.tiles{border-bottom:1px solid var(--border);padding:8px 0 24px;margin-bottom:28px}.tile,.tile.flag{background:transparent;padding:8px 0;border-radius:0;color:var(--ink)}.tile-num{font:500 27px/1.2 Inter,system-ui,sans-serif}.tile.flag .tile-label{color:var(--secondary-2)}.card{border:0;border-top:1px solid var(--border);border-radius:0;padding:20px 0}.grid{gap:38px}.segmented button.active{background:#faf7f1;box-shadow:none}.foot{border-top:1px solid var(--border);padding-top:18px}

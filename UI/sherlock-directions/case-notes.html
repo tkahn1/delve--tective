@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=380" />
+    <title>delve—tective</title>
+  <style>:root {
+  --ink: #29231f;
+  --secondary: #4e443b;
+  --secondary-2: #63564b;
+  --dimmed: #706358;
+  --border: #ded5c8;
+  --soft: #eee8de;
+  --flag: #8c5c38;
+  --flag-text: #674329;
+  --flag-tint: #f3eadb;
+  --link: #744e32;
+  --heading: 'Inter', system-ui, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: #faf7f1;
+}
+
+body {
+  width: 380px;
+  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font-size: 14px;
+  line-height: 1.4;
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+.popup { display: flex; flex-direction: column; }
+
+.row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+
+.section {
+  padding: 18px 20px;
+  border-top: 1px solid var(--border);
+}
+
+/* Header */
+.header { padding: 14px 20px; min-height: 60px; }
+.brand { display: flex; align-items: center; gap: 10px; }
+.logo { display: inline-flex; width: 28px; height: 28px; }
+.name { font-family: var(--heading); font-weight: 700; font-size: 18px; letter-spacing: -0.01em; }
+
+/* Switch */
+.switch { position: relative; display: inline-flex; align-items: center; min-height: 44px; cursor: pointer; flex-shrink: 0; }
+.switch input { position: absolute; opacity: 0; width: 1px; height: 1px; margin: 0; }
+.switch .track {
+  width: 48px; height: 28px; border-radius: 999px;
+  background: var(--border);
+  position: relative; transition: background 0.15s;
+}
+.switch .thumb {
+  position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%;
+  background: #faf7f1; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2); transition: transform 0.15s;
+}
+.switch input:checked + .track { background: var(--ink); }
+.switch input:checked + .track .thumb { transform: translateX(20px); }
+.switch input:focus-visible + .track { outline: 2px solid var(--link); outline-offset: 2px; }
+
+/* This page */
+.label {
+  font-size: 11px; font-weight: 600; letter-spacing: 0.08em; color: var(--secondary-2);
+  margin-bottom: 8px;
+}
+.headline {
+  font-family: var(--heading); font-weight: 700; font-size: 24px; letter-spacing: -0.01em;
+  margin: 0 0 12px;
+}
+.meter { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; margin-bottom: 14px; }
+.seg { height: 6px; border-radius: 999px; background: var(--border); }
+.seg.on { background: var(--flag); }
+.reasons { list-style: none; margin: 0; padding: 0; color: var(--secondary); }
+.reasons li { padding: 3px 0; }
+.clean { margin: 4px 0 0; color: var(--secondary); }
+.muted { margin: 4px 0 0; color: var(--dimmed); }
+
+/* Settings */
+.field-title { font-weight: 500; margin-bottom: 8px; }
+.segmented {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 4px;
+  background: var(--soft); border-radius: 7px; padding: 4px;
+}
+.segmented button {
+  font: inherit; color: var(--secondary-2); background: transparent; border: 0;
+  border-radius: 6px; min-height: 40px; cursor: pointer;
+}
+.segmented button.active {
+  background: #faf7f1; color: var(--ink); font-weight: 600;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+.segmented button:focus-visible { outline: 2px solid var(--link); outline-offset: 1px; }
+
+.site-row { margin-top: 14px; }
+.site-text { min-width: 0; }
+.site-title { font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.helper { display: block; font-size: 12px; color: var(--dimmed); }
+
+/* Counts */
+.counts { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.big { font-family: var(--heading); font-weight: 700; font-size: 26px; line-height: 1.1; }
+.count-label { font-size: 12px; color: var(--secondary-2); margin-top: 2px; }
+
+/* Link row */
+.link-row {
+  width: 100%; font: inherit; color: inherit; text-align: left; background: #faf7f1;
+  border: 0; border-top: 1px solid var(--border); cursor: pointer; min-height: 64px;
+}
+.link-row:hover { background: var(--soft); }
+.link-row:focus-visible { outline: 2px solid var(--link); outline-offset: -2px; }
+.link-title { display: block; font-weight: 600; }
+.chevron { display: inline-flex; color: var(--secondary-2); }
+
+body.off #this-page { opacity: 0.6; }
+
+/* Mark-as-slop button (user's own list, local only) */
+.mark-site { font: inherit; font-size: 12px; font-weight: 600; color: #674329; background: #f3eadb; border: 1px solid #FED7AA; border-radius: 8px; padding: 6px 10px; min-height: 32px; cursor: pointer; margin-right: 8px; white-space: nowrap; }
+.mark-site[aria-pressed="true"] { color: #4e443b; background: #eee8de; border-color: #ded5c8; }
+.mark-site:focus-visible { outline: 2px solid #744e32; outline-offset: 2px; }
+
+.mark-site.trust { color: #14532D; background: #F0FDF4; border-color: #BBF7D0; }
+.segmented.three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.sens-help { margin-top: 6px; }
+body{width:360px;background:#faf7f1;font-size:13px}.header{padding:14px 20px;min-height:67px}.logo,.logo svg{width:32px;height:32px}.name{font-family:Georgia,'Times New Roman',serif;font-weight:600;font-size:22px;letter-spacing:-.5px}.section{padding:15px 20px}.label{letter-spacing:0;font-size:11px;font-weight:500}.headline{font-family:Inter,system-ui,sans-serif;font-size:19px;font-weight:600;line-height:1.35;margin-bottom:10px}.meter{gap:3px;margin-bottom:12px;max-width:120px}.seg{height:3px}.switch .track{width:34px;height:20px}.switch .thumb{width:14px;height:14px}.switch input:checked+.track{background:var(--flag)}.switch input:checked+.track .thumb{transform:translateX(14px)}.segmented{padding:3px;border-radius:6px}.segmented button{font-size:12px;min-height:34px}.segmented button.active{background:#faf7f1;box-shadow:none}.site-row{display:grid;grid-template-columns:1fr auto auto;gap:8px}.site-text{grid-column:1 / 3}.site-row>.switch{grid-column:3;grid-row:1}.site-row>.mark-site{grid-row:2;margin:0}.site-row>.trust{grid-column:1}.site-row>#mark-site{grid-column:2 / 4}.mark-site,.mark-site.trust{background:transparent;color:var(--flag-text);border-color:var(--border);border-radius:5px;font-size:11px}.mark-site[aria-pressed=true]{background:var(--flag-tint);color:var(--ink)}.big{font-family:Inter,system-ui,sans-serif;font-size:22px;font-weight:500}.link-row{background:#faf7f1;min-height:56px}.link-title{font-size:12px;font-weight:500}.helper,.count-label{font-size:11px}.counts{padding-top:16px;padding-bottom:16px}.reasons{font-size:12px;line-height:1.6}[hidden]{display:none!important}@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+
+.header{background:#493628;color:#fcf7ef}.name{color:#fcf7ef;font-family:Georgia,serif}.header .switch input:checked+.track{background:#bb9975}body,html,.link-row{background:#fffdfa}.headline{font-size:18px}.section{padding-top:12px;padding-bottom:12px}.segmented{background:transparent;border:1px solid var(--border)}.segmented button.active{background:#eee8de}.counts{display:none}.helper{line-height:1.6}</style></head>
+  <body>
+    <main class="popup">
+      <header class="row header">
+        <span class="brand">
+          <span class="logo" id="logo"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#F3EADB"/><g fill="#493628"><path d="M17 23c0-9 5-15 14-15 8 0 13 5 14 14l-12-3-16 4Z"/><path d="m11 24 20-5 18 4 5 5H11Z"/><path d="M21 28h22l-1 6 6 6-6 2v7l-9 2-1 5H16l8-12-4-7Z"/><path d="m15 51 15-4 10 11H10Z"/></g><path d="M42 43h9c5 0 7-4 7-8" fill="none" stroke="#493628" stroke-width="3" stroke-linecap="round"/><path d="M54 31h8v6c0 5-8 5-8 0Z" fill="#493628"/><path d="m31 10-2 10" stroke="#BDA58A" stroke-width="1.5"/></svg>
+</span>
+          <span class="name">delve—tective</span>
+        </span>
+        <label class="switch" title="Turn delve—tective on or off">
+          <input type="checkbox" id="enabled" checked role="switch" aria-label="delve—tective on" />
+          <span class="track"><span class="thumb"></span></span>
+        </label>
+      </header>
+
+      <section class="section" id="this-page">
+        <div class="label">This page</div>
+        <div id="page-body"><h1 class="headline">Worth a second look</h1><ul class="reasons"><li>This domain is on your site list</li></ul><p class="muted">Sample finding for design comparison.</p></div>
+      </section>
+
+      <section class="section">
+        <div class="field-title">Flagged search results</div>
+        <div class="segmented" role="radiogroup" aria-label="Flagged search results">
+          <button type="button" role="radio" class="active" aria-checked="true" data-mode="dim">Dim</button>
+          <button type="button" role="radio" data-mode="hide">Hide</button>
+        </div>
+        <div class="row site-row" id="site-row">
+          <div class="site-text">
+            <div class="site-title" id="site-title">Check example.test</div>
+            <div class="helper">Turn off to skip this site</div>
+          </div>
+          <button type="button" id="trust-site" class="mark-site trust">Not slop</button>
+          <button type="button" id="mark-site" class="mark-site">Mark as slop</button>
+          <label class="switch">
+            <input type="checkbox" id="site-enabled" checked role="switch" />
+            <span class="track"><span class="thumb"></span></span>
+          </label>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="field-title">Sensitivity</div>
+        <div class="segmented three" role="radiogroup" aria-label="Sensitivity">
+          <button type="button" role="radio" data-sens="relaxed">Relaxed</button>
+          <button type="button" role="radio" class="active" aria-checked="true" data-sens="balanced">Balanced</button>
+          <button type="button" role="radio" data-sens="strict">Strict</button>
+        </div>
+        <div class="helper sens-help">Relaxed: only listed sites. Strict: outline suspect paragraphs on any page.</div>
+      </section>
+
+      <section class="section counts">
+        <div class="count">
+          <div class="big" id="count-dimmed">0</div>
+          <div class="count-label">results dimmed this week</div>
+        </div>
+        <div class="count">
+          <div class="big" id="count-pages">0</div>
+          <div class="count-label">pages flagged this week</div>
+        </div>
+      </section>
+
+      <button type="button" class="section row link-row" id="manage-link">
+        <span>
+          <span class="link-title">My sites</span>
+          <span class="helper">Sites you marked or trust</span>
+        </span>
+        <span class="chevron">›</span>
+      </button>
+
+      <button type="button" class="section row link-row" id="report-link">
+        <span>
+          <span class="link-title">Browsing activity</span>
+          <span class="helper">Counted on this device only</span>
+        </span>
+        <span class="chevron" id="chevron"></span>
+      </button>
+    </main>
+
+  </body>
+</html>

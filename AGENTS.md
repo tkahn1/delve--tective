@@ -60,6 +60,8 @@ UI/                   # Arnav's standalone UI previews, sample dashboard, and in
 
 ## UI work (Arnav)
 
+- **Latest LOCAL work (not pushed):** the actual extension presentation is now named delve—tective with an em dash, an original Sherlock-inspired profile/hat/pipe mark, warm paper and brown action colours. Popup/report/options styles and Shadow DOM warning tokens are updated; worker contracts and detector settings are preserved. The user explicitly requested NO PUSH. See root `handoff.md` for verification and remaining backend work. Old lavender/SlopSniffer previews are historical alternatives, not the current brand.
+
 - **Chosen direction:** Quiet browser utility. Keep the host page readable; small word/phrase highlights with reasons on hover, keyboard focus, or click. Avoid an always-open side panel and oversized dashboard meters/cards.
 - **Review package:** serve the repo root (`python -m http.server 8080`) and open `/UI/`. Includes the article highlight preview, all three design directions, and a Quiet dashboard with working time ranges. `UI/README.md` explains integration; `UI/TESTING.md` records supported targets and setup gaps.
 - **Truth boundary:** previews use labeled sample findings/counts, not live detector results. The installed extension still uses `extension/src/ui`, `popup`, and `report`. Do not replace real worker output with preview data.
