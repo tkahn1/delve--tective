@@ -81,7 +81,7 @@ function renderPage(state: TabState | null): void {
     body.appendChild(el('p', 'clean', 'Nothing flagged on this page.'));
     return;
   }
-  body.appendChild(el('h1', 'headline', `Second look: ${LEVEL_LABEL[state.level]}`));
+  body.appendChild(el('h1', 'headline', `Flag level: ${LEVEL_LABEL[state.level]}`));
   body.appendChild(meter(state.segments));
   if (state.reasons.length) body.appendChild(reasonList(state.reasons));
 }
@@ -104,12 +104,12 @@ function renderSettings(): void {
     const btn = $('mark-site') as HTMLButtonElement;
     btn.textContent = marked ? 'Unmark' : 'Mark as slop';
     btn.setAttribute('aria-pressed', String(marked));
-    btn.setAttribute('aria-label', marked ? `Unmark ${siteDomain}` : `Mark ${siteDomain} as slop for you`);
+    btn.setAttribute('aria-label', marked ? `Unmark ${siteDomain}` : `Mark ${siteDomain} as slop`);
     const trusted = (settings.trustedSites ?? []).includes(siteDomain);
     const tbtn = $('trust-site') as HTMLButtonElement;
     tbtn.textContent = trusted ? 'Untrust' : 'Not slop';
     tbtn.setAttribute('aria-pressed', String(trusted));
-    tbtn.setAttribute('aria-label', trusted ? `Stop trusting ${siteDomain}` : `Trust ${siteDomain}: never flag it for you`);
+    tbtn.setAttribute('aria-label', trusted ? `Stop trusting ${siteDomain}` : `Trust ${siteDomain}`);
   }
   document.querySelectorAll<HTMLButtonElement>('.segmented button[data-sens]').forEach((b) => {
     const on = b.dataset.sens === (settings.sensitivity ?? 'balanced');

@@ -31,7 +31,7 @@ export function createTooltip(): Tooltip {
   const labels = h('p', { class: 'r' });
   const explain = h('p', { class: 'ex', hidden: '' });
   const tip = h('div', { class: 'u tip', role: 'tooltip', hidden: '' },
-    h('p', { class: 't' }, 'Worth a second look'),
+    h('p', { class: 't' }, 'Flagged'),
     labels,
     explain,
     h('p', { class: 'fine' }, 'Checks can be wrong.'),

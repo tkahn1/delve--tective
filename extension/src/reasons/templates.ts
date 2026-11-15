@@ -25,13 +25,13 @@ export const SHORT_TEMPLATES: Record<TemplateId, string> = {
 
 /** One-line plain-language explanation of each reason, shown when hovering a short label. */
 export const EXPLAIN_TEMPLATES: Record<TemplateId, string> = {
-  'siteList.listed': 'This website is on a shared list of sites known for mass-produced content.',
-  'siteList.user': 'You added this site to your own list.',
-  'siteList.builder': 'This site was built with a tool that generates whole websites with AI.',
-  'copy.sameArticle': 'The same article text appears on {n} other websites.',
+  'siteList.listed': 'This site is on a shared list of content farms.',
+  'siteList.user': 'You marked this site.',
+  'siteList.builder': 'This site was made with an AI website builder.',
+  'copy.sameArticle': 'The same article appears on {n} other sites.',
   'copy.sameTitle': '{n} other results on this search page use nearly the same title.',
-  'text.page': 'Our on-device AI-writing model flagged {k} of {n} paragraphs on this page.',
-  'text.chunk': 'Our on-device AI-writing model scored this paragraph as very likely machine-written.',
+  'text.page': 'The text model flagged {k} of {n} paragraphs.',
+  'text.chunk': 'The text model rated this paragraph as likely AI-written.',
 };
 
 export function explainReason(ref: ReasonRef): string {

@@ -30,7 +30,7 @@ export function createSummaryBar(onFlip: (next: Mode) => void): SummaryBar {
       txt.textContent = '';
       // TODO(hack): plan only gives "dimmed" wording; "hid" in Hide mode is our guess.
       const verb = m === 'hide' ? 'hid' : 'dimmed';
-      txt.append(h('b', {}, `delve—tective ${verb} ${n} of ${total} results.`), ' Checked on this device. Nothing was sent.');
+      txt.append(h('b', {}, `delve—tective ${verb} ${n} of ${total} results.`));
       flip.textContent = m === 'dim' ? 'Hide them instead' : 'Dim them instead';
     },
     remove: sh.remove,
@@ -49,7 +49,7 @@ export function createReasonLine(reasons: string[], onShow: () => void): ShadowH
   sh.root.appendChild(
     h('div', { class: 'u reason' },
       h('span', { class: 'dot', 'aria-hidden': 'true' }),
-      h('span', {}, h('b', {}, 'Worth a second look:'), ' ', reasons.join(' · ')),
+      h('span', {}, h('b', {}, 'Flagged:'), ' ', reasons.join(' · ')),
       show),
   );
   return sh;

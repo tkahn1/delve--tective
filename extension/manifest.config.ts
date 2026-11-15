@@ -11,7 +11,7 @@ const icons = {
 export default defineManifest({
   manifest_version: 3,
   name: 'delve—tective',
-  description: 'Dims search results and outlines paragraphs that are worth a second look.',
+  description: 'Flags AI-generated junk in search results and on web pages.',
   version: pkg.version,
   icons,
   action: {

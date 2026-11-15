@@ -575,7 +575,7 @@ const MENU_TRUST = 'unslop-trust';
 function createMenus(): void {
   chrome.contextMenus.removeAll(() => {
     chrome.contextMenus.create({ id: MENU_MARK, title: 'Mark site as slop', contexts: ['page', 'link'] });
-    chrome.contextMenus.create({ id: MENU_TRUST, title: 'Trust this site (never flag it)', contexts: ['page', 'link'] });
+    chrome.contextMenus.create({ id: MENU_TRUST, title: 'Trust this site', contexts: ['page', 'link'] });
   });
 }
 chrome.contextMenus.onClicked.addListener((info, tab) => {

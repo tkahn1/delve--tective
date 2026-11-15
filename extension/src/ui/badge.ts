@@ -25,7 +25,7 @@ export function createBadge(opts: { onSeeAll(): void; onClose(): void }): Badge 
   const meter = h('div', { class: 'meter', 'aria-hidden': 'true' }, ...segs);
   const sum = h('p', { class: 'sum' });
   const all = h('button', { class: 'all', type: 'button' }, 'See all reasons');
-  const setup = h('p', { class: 'setup' }, 'Setting up page checks…');
+  const setup = h('p', { class: 'setup' }, 'Loading text model…');
   const card = h('div', { class: 'u badge', role: 'status', hidden: '' }, h('div', { class: 'head' }, title, close), meter, sum, all, setup);
   sh.root.appendChild(card);
   document.documentElement.appendChild(sh.host);
@@ -43,7 +43,7 @@ export function createBadge(opts: { onSeeAll(): void; onClose(): void }): Badge 
         return;
       }
       const hasLevel = v.level === 'medium' || v.level === 'high';
-      title.textContent = hasLevel ? `Second look: ${capitalize(v.level as string)}` : 'delve—tective';
+      title.textContent = hasLevel ? `Flag level: ${capitalize(v.level as string)}` : 'delve—tective';
       title.parentElement!.hidden = false;
       meter.hidden = !hasLevel;
       segs.forEach((s, i) => s.classList.toggle('on', i < v.segments));
