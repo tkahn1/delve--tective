@@ -59,6 +59,8 @@ eval/                 # test sets (gitignored) + RESULTS.md
 
 ## Known gotchas (updated 2026-11-14)
 
+- **Site list = our `pipeline/data/sites.csv` + third-party lists in `pipeline/data/imported/`** (~2,390 domains). One imported list is GPL-3.0; see `pipeline/data/imported/NOTICE.md` before selling/licensing the list. Licence notices ship in the extension (`public/THIRD_PARTY_NOTICES.md`, `public/licenses/`).
+
 - **No live Google search reliably shows listed junk sites yet** (checked 2026-11-14 in a signed-in browser): "best coffee grinder 2026" and "best air fryer 2026" returned none of the 5 listed domains. Opening listed pages directly works (badge + outlines). Candidates seen in live air-fryer results that still need checking: us.smartcopons.com, myplanetfood.com. Recheck live results before the demo.
 
 - **Model download:** the source repo (`Lynote/...-browser`) only ships `onnx/model.onnx` (fp32, ~500 MB), so `fetch_model.py` does not get the 8-bit file the extension loads. Download `onnx/model.onnx` and quantize it with `onnxruntime.quantization.quantize_dynamic(..., weight_type=QuantType.QInt8)` to `extension/public/models/fakespot-roberta/onnx/model_quantized.onnx` (~125 MB). Outputs match fp32 closely on spot checks. TODO(hack): fold this into `fetch_model.py`.

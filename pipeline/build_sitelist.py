@@ -1,7 +1,9 @@
 """Build the shipped site lists.
 
 Inputs (pipeline/data/):
-  sites.csv      domain,reason,note   reason is 'farm' or 'builder'
+  sites.csv      domain,reason,note   reason is 'farm' or 'builder' (our own, hand-verified)
+  imported/*.csv domain,reason,note   third-party lists, one file per source; licences in
+                 pipeline/data/imported/NOTICE.md. Delete a file to drop that source.
   allowlist.txt  one domain per line, '#' comments
   builders.json  { generators: [...], scriptHosts: [...] }  AI site-builder fingerprints
 
@@ -32,18 +34,20 @@ def clean_domain(d: str) -> str:
 
 def load_sites() -> dict[str, str]:
     sites: dict[str, str] = {}
-    with open(PIPE_DATA / "sites.csv", newline="", encoding="utf-8") as f:
-        for n, row in enumerate(csv.DictReader(f), start=2):
-            dom = clean_domain(row.get("domain") or "")
-            reason = (row.get("reason") or "").strip().lower()
-            if not dom:
-                continue
-            if reason not in REASONS:
-                sys.exit(f"sites.csv line {n}: reason must be farm|builder, got {reason!r}")
-            if dom in sites and sites[dom] != reason:
-                print(f"warning: {dom} listed twice with different reasons; keeping 'farm'")
-                reason = "farm"
-            sites[dom] = reason
+    files = [PIPE_DATA / "sites.csv"] + sorted((PIPE_DATA / "imported").glob("*.csv"))
+    for path in files:
+        with open(path, newline="", encoding="utf-8") as f:
+            for n, row in enumerate(csv.DictReader(f), start=2):
+                dom = clean_domain(row.get("domain") or "")
+                reason = (row.get("reason") or "").strip().lower()
+                if not dom:
+                    continue
+                if reason not in REASONS:
+                    sys.exit(f"{path.name} line {n}: reason must be farm|builder, got {reason!r}")
+                if dom in sites and sites[dom] != reason:
+                    print(f"warning: {dom} listed twice with different reasons; keeping 'farm'")
+                    reason = "farm"
+                sites[dom] = reason
     return sites
 
 
