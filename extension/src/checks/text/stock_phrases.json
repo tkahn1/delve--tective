@@ -1,0 +1,15 @@
+{
+  "_doc": "Phrases underlined inside OUTLINED paragraphs only (content/stockPhrases.ts). Only entries with published evidence of over-use in AI-written text; see sources. Matching: case-insensitive, whole word on both sides, spaces match any whitespace, straight or curly apostrophes. A trailing * means 'this stem plus any letters' (delv* = delve, delves, delving). Excluded on purpose: marketing cliches with no measured evidence (game-changer, seamless, unlock, elevate, in today's fast-paced world) and words common in ordinary human writing (key, crucial, vibrant, landscape, additionally). Refresh every 6-12 months: these words drift by model generation (e.g. 'delve' dropped sharply in 2025).",
+  "sources": {
+    "measured": "Kobak et al., Science Advances 2025 (excess words in PubMed abstracts: delves 28x, underscores 13.8x, showcasing 10.7x); Liang et al., ICML 2024 (ICLR peer reviews: meticulous 34.7x, intricate 11.2x, commendable 9.8x)",
+    "documented": "Wikipedia: Signs of AI writing (GPT-4 / GPT-4o / GPT-5 era vocabulary and 'inflated significance' patterns), checked 2026-11"
+  },
+  "measured": ["delv*", "underscor*", "showcas*", "meticulous*", "commendabl*", "intricat*"],
+  "documented": [
+    "tapestr*", "a testament to", "is a testament", "stands as a testament", "serves as a testament",
+    "pivotal role", "pivotal moment", "plays a crucial role", "plays a vital role", "plays a pivotal role",
+    "bolster*", "garner*", "interplay", "indelible mark", "setting the stage for", "evolving landscape",
+    "ever-evolving landscape", "fostering", "in the realm of", "navigate the complexities",
+    "a rich tapestry", "enduring legacy"
+  ]
+}

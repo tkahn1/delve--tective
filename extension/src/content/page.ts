@@ -6,6 +6,7 @@ import { createBadge, type Badge } from '../ui/badge';
 import { createOutlineLayer, type OutlineLayer } from '../ui/outline';
 import { createTooltip, type TipReason, type Tooltip } from '../ui/tooltip';
 import { extractPage, type Extracted } from './extract';
+import { findStockPhrases, setStockHighlights } from './stockPhrases';
 import type { Controller } from './search';
 
 const isTextReason = (r: ReasonRef) => r.templateId.startsWith('text.');
@@ -88,10 +89,22 @@ export function startPage(url: string, domain: string, _initial: Settings): Cont
           onLeave: () => tooltip?.hideSoon(),
         });
       }
-      if (key !== outlinedKey) outline.set(map);
+      if (key !== outlinedKey) {
+        outline.set(map);
+        // Quiet translucent fill on listed stock phrases, only inside outlined paragraphs.
+        // Nothing about them is shown in the hover box.
+        const ranges: Range[] = [];
+        for (const els of map.values()) {
+          for (const el of els) {
+            ranges.push(...findStockPhrases(el).ranges);
+          }
+        }
+        setStockHighlights(ranges);
+      }
     } else if (outline) {
       outline.remove();
       outline = null;
+      setStockHighlights([]);
       tooltip?.hide();
     }
     outlinedKey = key;
@@ -173,6 +186,7 @@ export function startPage(url: string, domain: string, _initial: Settings): Cont
       port?.disconnect();
       port = null;
       outline?.remove();
+      setStockHighlights([]);
       tooltip?.remove();
       badge?.remove();
       outline = null;

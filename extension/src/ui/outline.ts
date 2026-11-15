@@ -43,7 +43,7 @@ function listMarkerPad(el: HTMLElement): number {
 }
 
 export function createOutlineLayer(opts: {
-  onEnter(chunkIndex: number, rect: DOMRect): void;
+  onEnter(chunkIndex: number, rect: DOMRect, el: HTMLElement): void;
   onLeave(chunkIndex: number): void;
 }): OutlineLayer {
   // mix-blend-mode: multiply lets the flag tint sit "under" the page text without hiding it.
@@ -151,7 +151,7 @@ export function createOutlineLayer(opts: {
           // Highlight and anchor to this element only, not the whole chunk.
           const enter = () => {
             box.classList.add('on');
-            opts.onEnter(chunkIndex, viewportRect(entry));
+            opts.onEnter(chunkIndex, viewportRect(entry), el);
           };
           const leave = () => {
             box.classList.remove('on');
