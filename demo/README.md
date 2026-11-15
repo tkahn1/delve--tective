@@ -1,5 +1,7 @@
 # demo/
 
+**Live Google (2026-11-14):** neither "best coffee grinder 2026" nor "best air fryer 2026" currently shows a listed junk site, so pick the demo search after re-checking live results. Listed junk pages opened directly (e.g. https://www.talkofthehouse.com/?p=6288) show the badge and outlines. The saved Google pages below are mocks with placeholder results.
+
 Offline copies of the demo pages, so the demo works even when the live sites change or block us.
 These files are data: they are served as static HTML, never built or imported.
 

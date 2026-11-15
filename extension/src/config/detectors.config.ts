@@ -59,16 +59,18 @@ export const config: DetectorsConfig = {
     minWords: 50,
     chunkMin: 80,
     chunkMax: 250,
-    // TODO(hack): tuned on the live mayfairfarms/peggyomara pages (2026-11-14). At 0.3 layer A
-    // passed only ~8% of real chunks and missed most model-flagged ones, so it now only ranks
-    // chunks (threshold 0) and the top 12 go to layer B (~350 ms each on WASM, ~4 s total).
-    maxChunks: 12,
+    // TODO(hack): layer A only ranks chunks (threshold 0); the top 20 go to layer B (~350 ms each
+    // on WASM, ~7 s total, progressive). Tightened 2026-11-14 on 61 pre-2022 human pages + 16 live
+    // 2026 content-farm pages: 0.9/top12/min2 outlined 10/61 human and caught 8/16 AI;
+    // 0.98/top20/min3 outlined 1/61 human and caught 7/16 AI. Small set; see
+    // reports/Browser AI text detectors.md (outside the repo) for next steps (probe on labels).
+    maxChunks: 20,
     maxTokens: 256,
-    minFlaggedChunks: 2,
+    minFlaggedChunks: 3,
     layerA: { passThreshold: 0 },
     layerB: {
       enabled: true,
-      threshold: 0.9,
+      threshold: 0.98,
       modelId: 'fakespot-roberta',
       modelHost: '',
       device: 'wasm',
