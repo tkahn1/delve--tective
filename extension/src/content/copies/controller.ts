@@ -83,6 +83,17 @@ export function startCommentCopies(site: CopiesSite): Controller {
       if (s.finalApplied && !msg.final) return;
       if (msg.final) s.finalApplied = true;
       applyGroups(msg.groups);
+      if (msg.final) {
+        // One line per page in the console, to see where it stops if no flags appear.
+        const f = flags.stats();
+        const inGroups = msg.groups.reduce((a, g) => a + g.ids.length, 0);
+        console.info(
+          `[delve—tective] Repeated comments (${site.name}): ${s.comments.length} comments loaded, ` +
+            `${msg.groups.length} repeat groups (${inGroups} comments). On the page: ${f.onPage} comments, ` +
+            `${f.withId} with ids, ${f.inGroups} in groups, ${f.flagged} flagged` +
+            (f.noHeader ? `, ${f.noHeader} with no place for a flag` : '') + '.',
+        );
+      }
     } else if (msg.type === 'copies/api' && s.apiResolve) {
       if (msg.status === 'data') {
         addComments(msg.comments ?? []);
@@ -158,7 +169,11 @@ export function startCommentCopies(site: CopiesSite): Controller {
           },
         });
       } catch (e) {
-        if (live()) console.warn(`[unslop] ${site.name} comments stopped:`, (e as Error).message ?? e);
+        if (live()) {
+          const why = String((e as Error).message ?? e);
+          const hint = site.name === 'Reddit' && why === 'HTTP 403' ? ' (Reddit only serves comment data to logged-in users)' : '';
+          console.warn(`[delve—tective] ${site.name} comments stopped: ${why}${hint}`);
+        }
       }
     }
     if (!live()) return;

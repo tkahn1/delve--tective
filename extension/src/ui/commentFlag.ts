@@ -84,9 +84,19 @@ function createTip() {
   };
 }
 
+/** Last pass over the page, for the console summary. */
+export interface FlagStats {
+  onPage: number; // comment elements found
+  withId: number; // ...whose id could be read
+  inGroups: number; // ...that belong to a repeat group
+  noHeader: number; // ...in a group but with nowhere to put the pill
+  flagged: number;
+}
+
 export interface CommentFlags {
   /** Flag every comment on screen whose id is in a group of at least minCount. Call again as groups change. */
   update(byId: Map<string, CopyGroup>): void;
+  stats(): FlagStats;
   clear(): void;
   destroy(): void;
 }
@@ -119,22 +129,33 @@ export function createCommentFlags(site: FlagSite, minCount: number): CommentFla
     return sh.host;
   };
 
+  let last: FlagStats = { onPage: 0, withId: 0, inGroups: 0, noHeader: 0, flagged: 0 };
   const applyAll = () => {
+    const st: FlagStats = { onPage: 0, withId: 0, inGroups: 0, noHeader: 0, flagged: 0 };
     for (const node of site.nodes()) {
-      const header = site.headerOf(node);
-      if (!header) continue;
-      const existing = header.querySelector<HTMLElement>(`:scope > [${HOST_ATTR}]`);
+      st.onPage++;
       const id = site.idOf(node);
+      if (id) st.withId++;
       const g = id ? byId.get(id) : undefined;
-      if (!g || g.ids.length < minCount) {
+      const want = !!g && g.ids.length >= minCount;
+      if (want) st.inGroups++;
+      const header = site.headerOf(node);
+      if (!header) {
+        if (want) st.noHeader++;
+        continue;
+      }
+      const existing = header.querySelector<HTMLElement>(`:scope > [${HOST_ATTR}]`);
+      if (!want) {
         existing?.remove();
         continue;
       }
-      const copy = describe(g, site.where);
+      const copy = describe(g!, site.where);
       if (existing) {
         if (existing.dataset.key !== copy.detail) fill(existing, copy);
       } else header.appendChild(makeHost(copy));
+      st.flagged++;
     }
+    last = st;
   };
 
   let pending = 0;
@@ -152,6 +173,7 @@ export function createCommentFlags(site: FlagSite, minCount: number): CommentFla
       byId = next;
       applyAll();
     },
+    stats: () => last,
     clear() {
       byId = new Map();
       document.querySelectorAll(`[${HOST_ATTR}]`).forEach((e) => e.remove());
