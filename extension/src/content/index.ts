@@ -26,9 +26,10 @@ async function getSettings(): Promise<Settings> {
 
 /**
  * One running copy per tab. When the extension is reloaded or updated, Chrome cuts the old content script off
- * (chrome.runtime.id becomes undefined) but leaves it and its UI in the page, and the worker injects a fresh copy
- * into YouTube / Reddit tabs. The fresh copy replaces a dead one instead of bowing out to it, and a dead copy
- * removes its own flags so nothing stale is left behind.
+ * (chrome.runtime.id becomes undefined) but leaves it and its UI in the page. A dead copy removes its own flags so
+ * nothing stale is left behind, and a fresh copy (next page load) replaces it instead of bowing out to it.
+ * Re-injecting into open tabs was tried and fails: the build's loader can't import its chunk there.
+ * The popup asks for a refresh instead (popup.ts, renderCopies).
  */
 interface Instance {
   alive(): boolean;

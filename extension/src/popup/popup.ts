@@ -22,6 +22,18 @@ let siteDomain = '';
 let activeTabId: number | undefined;
 let lastState: TabState | null = null;
 let lastCopies: CopiesStatus | null = null;
+let tabUrl = '';
+/** Pages where repeated comments are checked: YouTube videos and Reddit threads. */
+const commentsPage = (url: string): boolean => {
+  try {
+    const u = new URL(url);
+    if (/(^|\.)youtube\.com$/i.test(u.hostname)) return u.pathname === '/watch';
+    if (/(^|\.)reddit\.com$/i.test(u.hostname)) return /\/comments\/[a-z0-9]+/i.test(u.pathname);
+  } catch {
+    /* not a web page */
+  }
+  return false;
+};
 
 function send<T>(msg: unknown): Promise<T | null> {
   return chrome.runtime.sendMessage(msg).then(
@@ -267,6 +279,7 @@ async function init(): Promise<void> {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   activeTabId = tab?.id;
   siteDomain = domainFromUrl(tab?.url);
+  tabUrl = tab?.url ?? '';
 
   const s = await send<Settings>({ type: 'settings/get' });
   if (s) settings = s;
@@ -293,7 +306,13 @@ async function refreshCopies(): Promise<void> {
 
 function renderCopies(st: CopiesStatus | null): void {
   const section = $('copies');
-  section.hidden = !st || !settings.enabled;
+  // No check running on a video / thread: the page was opened before the extension was installed or reloaded.
+  const needsRefresh = !st && settings.enabled && commentsPage(tabUrl) && !settings.disabledSites.includes(siteDomain);
+  section.hidden = (!st && !needsRefresh) || !settings.enabled;
+  if (needsRefresh) {
+    $('copies-head').textContent = 'Refresh this page to check its comments';
+    $('copies-sub').textContent = 'It was opened before delve—tective was installed or reloaded.';
+  }
   const metrics = $('copies-metrics');
   metrics.textContent = '';
   const row = (k: string, v: string, warn = false) => {
