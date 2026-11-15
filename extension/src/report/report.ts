@@ -14,6 +14,7 @@ type Summary = ReturnType<typeof summarize>;
 // Short labels for report rows (no counts, since the report aggregates many pages).
 const REASON_LABEL: Record<TemplateId, string> = {
   'siteList.listed': 'On the shared junk-site list',
+  'siteList.user': 'Marked by you',
   'siteList.builder': 'Built with an AI site builder',
   'copy.sameArticle': 'Same article on other sites',
   'copy.sameTitle': 'Same title as other results',

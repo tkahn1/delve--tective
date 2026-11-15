@@ -16,7 +16,7 @@ const $ = <T extends HTMLElement = HTMLElement>(id: string): T => document.getEl
 
 const LEVEL_LABEL: Record<Level, string> = { low: 'Low', medium: 'Medium', high: 'High' };
 
-let settings: Settings = { enabled: true, mode: 'dim', disabledSites: [] };
+let settings: Settings = { enabled: true, mode: 'dim', disabledSites: [], markedSites: [] };
 let siteDomain = '';
 let activeTabId: number | undefined;
 
@@ -96,6 +96,11 @@ function renderSettings(): void {
     const input = $('site-enabled') as HTMLInputElement;
     input.checked = !settings.disabledSites.includes(siteDomain);
     input.setAttribute('aria-label', `Check ${siteDomain}`);
+    const marked = (settings.markedSites ?? []).includes(siteDomain);
+    const btn = $('mark-site') as HTMLButtonElement;
+    btn.textContent = marked ? 'Unmark' : 'Mark as slop';
+    btn.setAttribute('aria-pressed', String(marked));
+    btn.setAttribute('aria-label', marked ? `Unmark ${siteDomain}` : `Mark ${siteDomain} as slop for you`);
   }
   document.body.classList.toggle('off', !settings.enabled);
 }
@@ -152,6 +157,12 @@ async function init(): Promise<void> {
     const on = (e.target as HTMLInputElement).checked;
     const rest = settings.disabledSites.filter((d) => d !== siteDomain);
     void setSettings({ disabledSites: on ? rest : [...rest, siteDomain] });
+  });
+  $('mark-site').addEventListener('click', () => {
+    if (!siteDomain) return;
+    const list = settings.markedSites ?? [];
+    const marked = list.includes(siteDomain);
+    void setSettings({ markedSites: marked ? list.filter((d) => d !== siteDomain) : [...list, siteDomain] });
   });
   $('report-link').addEventListener('click', () => {
     void chrome.tabs.create({ url: chrome.runtime.getURL('src/report/index.html') });

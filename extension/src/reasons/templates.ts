@@ -4,6 +4,7 @@ import type { ReasonRef, TemplateId } from '../checks/types';
 
 export const TEMPLATES: Record<TemplateId, string> = {
   'siteList.listed': 'on the shared junk-site list',
+  'siteList.user': 'you marked this site',
   'siteList.builder': 'site built with an AI site builder',
   'copy.sameArticle': 'same article appears on {n} other sites',
   'copy.sameTitle': 'same title as {n} other results on this page',

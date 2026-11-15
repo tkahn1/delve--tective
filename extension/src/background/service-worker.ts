@@ -72,6 +72,7 @@ async function getSettings(): Promise<Settings> {
 async function setSettings(patch: Partial<Settings>): Promise<Settings> {
   const next: Settings = { ...(await getSettings()), ...patch };
   next.disabledSites = Array.from(new Set((next.disabledSites ?? []).map((s) => s.toLowerCase())));
+  next.markedSites = Array.from(new Set((next.markedSites ?? []).map((s) => s.toLowerCase())));
   settingsCache = next;
   await chrome.storage.local.set({ [SETTINGS_KEY]: next });
   broadcastSettings(next);
@@ -162,10 +163,23 @@ const searchKey = (tabId: number) => `search:${tabId}`;
 /** Result URLs already counted in stats for this tab (dedupe across re-checks and reloads). */
 const seenKey = (tabId: number) => `seen:${tabId}`;
 
+/** Sites the user marked as slop count as listed for them (local only). */
+function isUserMarked(settings: Settings, domain: string): boolean {
+  const d = domain.toLowerCase();
+  return (settings.markedSites ?? []).some((s) => d === s || d.endsWith('.' + s));
+}
+function userMarkEvidence(settings: Settings, domain: string): Evidence[] {
+  return isUserMarked(settings, domain)
+    ? [{ checkId: 'siteList', score: 1, confidence: 'high', reasons: [{ templateId: 'siteList.user' }] }]
+    : [];
+}
+
 async function checkResult(input: PageInput, settings: Settings): Promise<ResultVerdict> {
   const none: ResultVerdict = { flagged: false, level: null, reasons: [] };
-  if (!input.domain || isAllowlisted(input.domain) || isSiteDisabled(settings, input.domain)) return none;
-  const evidence = await runWorkerChecks(input);
+  if (!input.domain || isSiteDisabled(settings, input.domain)) return none;
+  const marked = userMarkEvidence(settings, input.domain);
+  if (!marked.length && isAllowlisted(input.domain)) return none;
+  const evidence = [...(await runWorkerChecks(input)), ...marked];
   const c = combine(evidence);
   return {
     flagged: levelAtLeast(c.level, config.resultFlagLevel),
@@ -375,7 +389,8 @@ async function handlePageCheck(port: chrome.runtime.Port, input: PageInput): Pro
   const tabId = port.sender?.tab?.id;
   const settings = await getSettings();
 
-  if (!input.domain || isAllowlisted(input.domain) || isSiteDisabled(settings, input.domain)) {
+  const marked = input.domain ? userMarkEvidence(settings, input.domain) : [];
+  if (!input.domain || (!marked.length && isAllowlisted(input.domain)) || isSiteDisabled(settings, input.domain)) {
     post(port, emptyPageVerdict({ chunkCount: input.chunks?.length ?? 0 }));
     if (tabId !== undefined) {
       await setTabState(tabId, {
@@ -391,7 +406,7 @@ async function handlePageCheck(port: chrome.runtime.Port, input: PageInput): Pro
     return;
   }
 
-  const worker = await runWorkerChecks(input);
+  const worker = [...(await runWorkerChecks(input)), ...marked];
   const needsEngine =
     engineStatus !== 'unavailable' &&
     (input.chunks?.length ?? 0) > 0 &&

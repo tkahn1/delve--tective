@@ -2,6 +2,7 @@ export type Target = 'result' | 'page';
 export type Level = 'low' | 'medium' | 'high';
 export type TemplateId =
   | 'siteList.listed'
+  | 'siteList.user'
   | 'siteList.builder'
   | 'copy.sameArticle'
   | 'copy.sameTitle'

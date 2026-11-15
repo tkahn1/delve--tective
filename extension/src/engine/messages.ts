@@ -10,9 +10,11 @@ export interface Settings {
   enabled: boolean;
   mode: 'dim' | 'hide';
   disabledSites: string[];
+  /** Sites the user marked as slop themselves (registrable domains). Local only, never sent. */
+  markedSites: string[];
 }
 
-export const DEFAULT_SETTINGS: Settings = { enabled: true, mode: 'dim', disabledSites: [] };
+export const DEFAULT_SETTINGS: Settings = { enabled: true, mode: 'dim', disabledSites: [], markedSites: [] };
 
 export interface ResultVerdict {
   flagged: boolean;
