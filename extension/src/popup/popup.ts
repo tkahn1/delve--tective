@@ -81,7 +81,7 @@ function renderPage(state: TabState | null): void {
     body.appendChild(el('p', 'clean', 'Nothing flagged on this page.'));
     return;
   }
-  body.appendChild(el('h1', 'headline', `Flag level: ${LEVEL_LABEL[state.level]}`));
+  body.appendChild(el('h1', 'headline', 'Flagged'));
   body.appendChild(meter(state.segments));
   if (state.reasons.length) body.appendChild(reasonList(state.reasons));
 }
