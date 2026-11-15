@@ -1,16 +1,27 @@
 // Dashed outlines around flagged chunks, drawn as absolutely positioned boxes in one shadow
 // host (pointer-events none). Hover/focus is tracked on the page's own paragraph elements.
+//
+// A chunk (what the text check scores) can span several short page elements, e.g. a run of
+// <li>s. Scoring stays per chunk, but everything the user sees is per element: each element
+// gets its own box, hovering highlights only that box, and the hover box is placed beside it.
 import { createShadowHost, h } from './shadow';
 import { OUTLINE_CSS } from './styles';
 
 const PAD_X = 10;
 const PAD_Y = 6;
+/** Minimum clear space between two neighbouring boxes, so they read as separate. */
+const GAP = 6;
+/** Extra left padding so an outside list marker (bullet/number) sits inside the box. */
+const LIST_MARKER_PAD = 18;
 
 interface Entry {
   chunkIndex: number;
   el: HTMLElement;
   box: HTMLDivElement;
+  padLeft: number;
   addedTabindex: boolean;
+  /** Last placed box rect in document coordinates. */
+  rect: { left: number; top: number; right: number; bottom: number } | null;
   cleanup: () => void;
 }
 
@@ -19,6 +30,16 @@ export interface OutlineLayer {
   set(chunks: Map<number, HTMLElement[]>): void;
   reposition(): void;
   remove(): void;
+}
+
+function listMarkerPad(el: HTMLElement): number {
+  if (el.tagName !== 'LI') return 0;
+  try {
+    const cs = getComputedStyle(el);
+    return cs.listStylePosition === 'outside' && cs.listStyleType !== 'none' ? LIST_MARKER_PAD : 0;
+  } catch {
+    return 0;
+  }
 }
 
 export function createOutlineLayer(opts: {
@@ -37,37 +58,60 @@ export function createOutlineLayer(opts: {
   let entries: Entry[] = [];
   let raf = 0;
 
-  const highlight = (chunkIndex: number, on: boolean) => {
-    for (const e of entries) if (e.chunkIndex === chunkIndex) e.box.classList.toggle('on', on);
-  };
-
-  /** Union rect (viewport coords) of all boxes for a chunk. */
-  const chunkRect = (chunkIndex: number): DOMRect => {
-    let l = Infinity, t = Infinity, r = -Infinity, b = -Infinity;
-    for (const e of entries) {
-      if (e.chunkIndex !== chunkIndex) continue;
+  /** The box rect of one entry, in viewport coordinates (for placing the hover box). */
+  const viewportRect = (e: Entry): DOMRect => {
+    if (!e.rect) {
       const rc = e.el.getBoundingClientRect();
-      l = Math.min(l, rc.left - PAD_X); t = Math.min(t, rc.top - PAD_Y);
-      r = Math.max(r, rc.right + PAD_X); b = Math.max(b, rc.bottom + PAD_Y);
+      return new DOMRect(rc.left - PAD_X - e.padLeft, rc.top - PAD_Y, rc.width + PAD_X * 2 + e.padLeft, rc.height + PAD_Y * 2);
     }
-    return new DOMRect(l, t, r - l, b - t);
+    const { left, top, right, bottom } = e.rect;
+    return new DOMRect(left - window.scrollX, top - window.scrollY, right - left, bottom - top);
   };
 
   const place = () => {
     raf = 0;
     const sx = window.scrollX;
     const sy = window.scrollY;
+    // 1. Padded rect per element, plus the element's own (unpadded) top/bottom.
+    const placed: { e: Entry; elTop: number; elBottom: number; r: NonNullable<Entry['rect']> }[] = [];
     for (const e of entries) {
       const rc = e.el.getBoundingClientRect();
       if (rc.width === 0 && rc.height === 0) {
         e.box.style.display = 'none';
+        e.rect = null;
         continue;
       }
-      e.box.style.display = '';
-      e.box.style.left = `${rc.left + sx - PAD_X}px`;
-      e.box.style.top = `${rc.top + sy - PAD_Y}px`;
-      e.box.style.width = `${rc.width + PAD_X * 2}px`;
-      e.box.style.height = `${rc.height + PAD_Y * 2}px`;
+      const elTop = rc.top + sy;
+      const elBottom = rc.bottom + sy;
+      placed.push({
+        e,
+        elTop,
+        elBottom,
+        r: { left: rc.left + sx - PAD_X - e.padLeft, top: elTop - PAD_Y, right: rc.right + sx + PAD_X, bottom: elBottom + PAD_Y },
+      });
+    }
+    // 2. Neighbouring boxes must not touch: split the space between two stacked elements
+    //    and leave GAP between their boxes.
+    placed.sort((a, b) => a.elTop - b.elTop);
+    for (let i = 0; i + 1 < placed.length; i++) {
+      const a = placed[i];
+      const b = placed[i + 1];
+      const overlapX = a.r.left < b.r.right && b.r.left < a.r.right;
+      if (!overlapX || a.elBottom > b.elTop + 1) continue; // side by side, or elements overlap
+      if (a.r.bottom + GAP <= b.r.top) continue; // already apart
+      const mid = (a.elBottom + b.elTop) / 2;
+      a.r.bottom = Math.min(a.r.bottom, mid - GAP / 2);
+      b.r.top = Math.max(b.r.top, mid + GAP / 2);
+    }
+    // 3. Draw.
+    for (const p of placed) {
+      p.e.rect = p.r;
+      const s = p.e.box.style;
+      s.display = '';
+      s.left = `${p.r.left}px`;
+      s.top = `${p.r.top}px`;
+      s.width = `${p.r.right - p.r.left}px`;
+      s.height = `${Math.max(0, p.r.bottom - p.r.top)}px`;
     }
   };
   const schedule = () => {
@@ -95,32 +139,35 @@ export function createOutlineLayer(opts: {
         for (const el of els) {
           const box = h('div', { class: 'box' });
           layer.appendChild(box);
+          const entry: Entry = {
+            chunkIndex,
+            el,
+            box,
+            padLeft: listMarkerPad(el),
+            addedTabindex: !el.hasAttribute('tabindex'),
+            rect: null,
+            cleanup: () => {},
+          };
+          // Highlight and anchor to this element only, not the whole chunk.
           const enter = () => {
-            highlight(chunkIndex, true);
-            opts.onEnter(chunkIndex, chunkRect(chunkIndex));
+            box.classList.add('on');
+            opts.onEnter(chunkIndex, viewportRect(entry));
           };
           const leave = () => {
-            highlight(chunkIndex, false);
+            box.classList.remove('on');
             opts.onLeave(chunkIndex);
           };
           el.addEventListener('mouseenter', enter);
           el.addEventListener('mouseleave', leave);
           el.addEventListener('focus', enter);
           el.addEventListener('blur', leave);
-          const addedTabindex = !el.hasAttribute('tabindex');
-          if (addedTabindex) el.setAttribute('tabindex', '0');
-          const entry: Entry = {
-            chunkIndex,
-            el,
-            box,
-            addedTabindex,
-            cleanup: () => {
-              el.removeEventListener('mouseenter', enter);
-              el.removeEventListener('mouseleave', leave);
-              el.removeEventListener('focus', enter);
-              el.removeEventListener('blur', leave);
-              if (entry.addedTabindex) el.removeAttribute('tabindex');
-            },
+          if (entry.addedTabindex) el.setAttribute('tabindex', '0');
+          entry.cleanup = () => {
+            el.removeEventListener('mouseenter', enter);
+            el.removeEventListener('mouseleave', leave);
+            el.removeEventListener('focus', enter);
+            el.removeEventListener('blur', leave);
+            if (entry.addedTabindex) el.removeAttribute('tabindex');
           };
           entries.push(entry);
         }

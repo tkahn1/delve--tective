@@ -1,7 +1,7 @@
 // Page mode (Screen 2): outline flagged chunks, hover box, corner badge. Progressive verdicts over a Port.
 import type { PageInput, ReasonRef } from '../checks/types';
 import type { PageVerdict, PageVerdictMsg, Settings } from '../engine/messages';
-import { capitalize, fillReason } from '../reasons/templates';
+import { capitalize, fillReason, shortReason } from '../reasons/templates';
 import { createBadge, type Badge } from '../ui/badge';
 import { createOutlineLayer, type OutlineLayer } from '../ui/outline';
 import { createTooltip, type Tooltip } from '../ui/tooltip';
@@ -36,11 +36,11 @@ function hoverReasons(v: PageVerdict, chunkIndex: number): string[] {
   const refs = [...(span?.reasons ?? []), ...v.reasons.filter((r) => r.templateId !== 'text.page')];
   const out: string[] = [];
   for (const r of refs) {
-    const t = capitalize(fillReason(r));
+    const t = shortReason(r);
     if (t && !out.includes(t)) out.push(t);
     if (out.length === 3) break;
   }
-  if (!out.length) out.push(capitalize(fillReason({ templateId: 'text.chunk' })));
+  if (!out.length) out.push(shortReason({ templateId: 'text.chunk' }));
   return out;
 }
 

@@ -2,8 +2,8 @@
 import { createShadowHost, h } from './shadow';
 import { TOOLTIP_CSS } from './styles';
 
-const WIDTH = 250;
-const GAP = 14;
+const WIDTH = 200;
+const GAP = 10;
 
 export interface Tooltip {
   /** rect is in viewport coordinates (getBoundingClientRect of the outlined block). */
@@ -17,20 +17,19 @@ export function createTooltip(): Tooltip {
     TOOLTIP_CSS,
     'position:absolute;left:0;top:0;width:0;height:0;overflow:visible;z-index:2147483647;pointer-events:none;',
   );
-  const list = h('ul', {});
+  // Minimal: a title, the reasons on one line, a short caveat.
+  const list = h('p', { class: 'r' });
   const tip = h('div', { class: 'u tip', role: 'tooltip', hidden: '' },
     h('p', { class: 't' }, 'Worth a second look'),
-    h('p', { class: 'why' }, 'Why this paragraph is outlined:'),
     list,
-    h('p', { class: 'fine' }, 'Checks can be wrong, especially on formal or non-native writing.'),
+    h('p', { class: 'fine' }, 'Checks can be wrong.'),
   );
   sh.root.appendChild(tip);
   document.documentElement.appendChild(sh.host);
 
   return {
     show(rect, reasons) {
-      list.textContent = '';
-      for (const r of reasons) list.append(h('li', {}, r));
+      list.textContent = reasons.join(' · ');
       tip.hidden = false;
       const vw = document.documentElement.clientWidth;
       const sx = window.scrollX;

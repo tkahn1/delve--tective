@@ -12,8 +12,26 @@ export const TEMPLATES: Record<TemplateId, string> = {
   'text.chunk': 'Flagged by the text check',
 };
 
+/** Short labels for tight spaces (the paragraph hover box). Same facts, fewer words. */
+export const SHORT_TEMPLATES: Record<TemplateId, string> = {
+  'siteList.listed': 'Junk-site list',
+  'siteList.user': 'You marked this site',
+  'siteList.builder': 'AI site builder',
+  'copy.sameArticle': 'Copied on {n} other sites',
+  'copy.sameTitle': 'Same title as {n} other results',
+  'text.page': '{k} of {n} paragraphs flagged',
+  'text.chunk': 'Text check',
+};
+
 export function fillReason(ref: ReasonRef): string {
-  const template = TEMPLATES[ref.templateId];
+  return fillTemplate(TEMPLATES[ref.templateId], ref);
+}
+
+export function shortReason(ref: ReasonRef): string {
+  return fillTemplate(SHORT_TEMPLATES[ref.templateId], ref);
+}
+
+function fillTemplate(template: string | undefined, ref: ReasonRef): string {
   if (!template) return '';
   // "{n} other sites" -> "1 other site" when n === 1 (also "results", "paragraphs").
   const plural = template.replace(/\{(\w+)\}( of \{\w+\})?( other)? (sites|results|paragraphs)\b/g, (m, key: string, of, other, noun: string) => {

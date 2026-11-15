@@ -63,15 +63,12 @@ export const OUTLINE_CSS = `
 `;
 
 export const TOOLTIP_CSS = `
-.tip { position: absolute; width: 250px; background: ${C.ink}; color: #FFFFFF; border-radius: 10px;
-  padding: 12px 14px; box-shadow: 0 8px 24px rgba(0,0,0,.18); pointer-events: none; font-size: 12px; line-height: 1.45; }
+.tip { position: absolute; width: max-content; max-width: 200px; background: ${C.ink}; color: #FFFFFF; border-radius: 8px;
+  padding: 8px 10px; box-shadow: 0 6px 16px rgba(0,0,0,.16); pointer-events: none; font-size: 12px; line-height: 1.4; }
 .tip[hidden] { display: none; }
-.tip .t { font-family: ${FONT_HEAD}; font-weight: 600; font-size: 13px; margin: 0 0 6px; color: #FFFFFF; }
-.tip .why { color: #ded5c8; margin: 0 0 4px; }
-.tip ul { list-style: none; margin: 0 0 8px; padding: 0; }
-.tip li { margin: 2px 0; color: #FFFFFF; }
-.tip li::before { content: '\\00B7'; margin-right: 6px; }
-.tip .fine { color: #A1A1AA; font-size: 11px; margin: 0; }
+.tip .t { font-family: ${FONT_HEAD}; font-weight: 600; font-size: 12px; margin: 0 0 2px; color: #FFFFFF; }
+.tip .r { margin: 0 0 4px; color: #FFFFFF; }
+.tip .fine { color: #A1A1AA; font-size: 10.5px; margin: 0; }
 `;
 
 export const BADGE_CSS = `
