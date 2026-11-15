@@ -67,7 +67,12 @@ export const TOOLTIP_CSS = `
   padding: 8px 10px; box-shadow: 0 6px 16px rgba(0,0,0,.16); pointer-events: none; font-size: 12px; line-height: 1.4; }
 .tip[hidden] { display: none; }
 .tip .t { font-family: ${FONT_HEAD}; font-weight: 600; font-size: 12px; margin: 0 0 2px; color: #FFFFFF; }
+.tip { pointer-events: auto; }
 .tip .r { margin: 0 0 4px; color: #FFFFFF; }
+.tip .lbl { cursor: help; border-bottom: 1px dotted rgba(255,255,255,.55); outline: none; border-radius: 2px; }
+.tip .lbl:hover, .tip .lbl:focus-visible { border-bottom-color: #FFFFFF; background: rgba(255,255,255,.12); }
+.tip .ex { margin: 0 0 6px; color: #E4E4E7; font-size: 11px; line-height: 1.35; }
+.tip .ex[hidden] { display: none; }
 .tip .fine { color: #A1A1AA; font-size: 10.5px; margin: 0; }
 `;
 

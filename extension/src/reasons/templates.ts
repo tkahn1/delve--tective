@@ -23,6 +23,21 @@ export const SHORT_TEMPLATES: Record<TemplateId, string> = {
   'text.chunk': 'Text check',
 };
 
+/** One-line plain-language explanation of each reason, shown when hovering a short label. */
+export const EXPLAIN_TEMPLATES: Record<TemplateId, string> = {
+  'siteList.listed': 'This website is on a shared list of sites known for mass-produced content.',
+  'siteList.user': 'You added this site to your own list.',
+  'siteList.builder': 'This site was built with a tool that generates whole websites with AI.',
+  'copy.sameArticle': 'The same article text appears on {n} other websites.',
+  'copy.sameTitle': '{n} other results on this search page use nearly the same title.',
+  'text.page': 'Our on-device AI-writing model flagged {k} of {n} paragraphs on this page.',
+  'text.chunk': 'Our on-device AI-writing model scored this paragraph as very likely machine-written.',
+};
+
+export function explainReason(ref: ReasonRef): string {
+  return fillTemplate(EXPLAIN_TEMPLATES[ref.templateId], ref);
+}
+
 export function fillReason(ref: ReasonRef): string {
   return fillTemplate(TEMPLATES[ref.templateId], ref);
 }

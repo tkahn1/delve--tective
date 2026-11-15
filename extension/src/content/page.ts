@@ -1,10 +1,10 @@
 // Page mode (Screen 2): outline flagged chunks, hover box, corner badge. Progressive verdicts over a Port.
 import type { PageInput, ReasonRef } from '../checks/types';
 import type { PageVerdict, PageVerdictMsg, Settings } from '../engine/messages';
-import { capitalize, fillReason, shortReason } from '../reasons/templates';
+import { capitalize, explainReason, fillReason, shortReason } from '../reasons/templates';
 import { createBadge, type Badge } from '../ui/badge';
 import { createOutlineLayer, type OutlineLayer } from '../ui/outline';
-import { createTooltip, type Tooltip } from '../ui/tooltip';
+import { createTooltip, type TipReason, type Tooltip } from '../ui/tooltip';
 import { extractPage, type Extracted } from './extract';
 import type { Controller } from './search';
 
@@ -30,17 +30,21 @@ export function badgeSummary(v: PageVerdict, chunkEls?: HTMLElement[][]): string
   return parts.join(' ');
 }
 
-/** Hover-box reasons: chunk reasons first, then page-level reasons; up to three, de-duplicated. */
-function hoverReasons(v: PageVerdict, chunkIndex: number): string[] {
+/** Hover-box reasons: chunk reasons first, then page-level reasons; up to three, de-duplicated.
+ *  Each has a short label and a one-line explanation (shown when the label is hovered). */
+function hoverReasons(v: PageVerdict, chunkIndex: number): TipReason[] {
   const span = v.spans.find((s) => s.chunkIndex === chunkIndex);
   const refs = [...(span?.reasons ?? []), ...v.reasons.filter((r) => r.templateId !== 'text.page')];
-  const out: string[] = [];
+  const out: TipReason[] = [];
   for (const r of refs) {
-    const t = shortReason(r);
-    if (t && !out.includes(t)) out.push(t);
+    const label = shortReason(r);
+    if (label && !out.some((o) => o.label === label)) out.push({ label, explain: explainReason(r) });
     if (out.length === 3) break;
   }
-  if (!out.length) out.push(shortReason({ templateId: 'text.chunk' }));
+  if (!out.length) {
+    const r: ReasonRef = { templateId: 'text.chunk' };
+    out.push({ label: shortReason(r), explain: explainReason(r) });
+  }
   return out;
 }
 
@@ -80,7 +84,8 @@ export function startPage(url: string, domain: string, _initial: Settings): Cont
       if (!outline) {
         outline = createOutlineLayer({
           onEnter: (i, rect) => verdict && tooltip?.show(rect, hoverReasons(verdict, i)),
-          onLeave: () => tooltip?.hide(),
+          // Short delay so the mouse can move from the paragraph into the box to read a label.
+          onLeave: () => tooltip?.hideSoon(),
         });
       }
       if (key !== outlinedKey) outline.set(map);
