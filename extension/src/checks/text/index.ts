@@ -1,7 +1,10 @@
-// Text check: layer A (phrases) filters, layer B (RoBERTa) judges. Runs in the offscreen doc.
+// Text check: layer A (logistic regression, scorers/lr.ts) filters and ranks, layer B (RoBERTa)
+// judges. Runs in the offscreen doc. The old hand-weighted scorer (scorers/phrases.ts) is kept for
+// pipeline/eval.py parity and comparison but no longer used here.
 import { config } from '../../config/detectors.config';
 import type { Check, CheckContext, Evidence, PageInput, SpanFlag } from '../types';
-import { countWords, phrasesScorer } from './scorers/phrases';
+import { countWords } from './scorers/phrases';
+import { lrScorer } from './scorers/lr';
 import { robertaScorer } from './scorers/roberta';
 
 export type LayerBStatus = 'loading' | 'ready' | 'unavailable';
@@ -49,20 +52,16 @@ export const textCheck: Check = {
     });
     if (eligible.length === 0) return null;
 
-    const aScores = await phrasesScorer.score(eligible.map((i) => chunks[i]));
+    const aScores = await lrScorer.score(eligible.map((i) => chunks[i]));
     const passing = eligible
       .map((idx, j) => ({ idx, a: aScores[j] }))
       .filter((p) => p.a >= config.text.layerA.passThreshold);
 
     if (config.text.layerB.enabled) await textCheck.init!();
     if (!robertaScorer.available) {
-      // Layer A only: no outlines, small nudge via textLayerAOnly weight in combine.
-      return {
-        checkId: 'text',
-        score: passing.length / eligible.length,
-        confidence: 'low',
-        reasons: [],
-      };
+      // Model loading or unavailable: report nothing. Layer A alone is not evidence; with
+      // passThreshold 0 its pass share was always 1.0, which marked every page with text Low.
+      return null;
     }
 
     const toCheck = [...passing].sort((x, y) => y.a - x.a).slice(0, config.text.maxChunks);

@@ -67,7 +67,10 @@ export const config: DetectorsConfig = {
     maxChunks: 20,
     maxTokens: 256,
     minFlaggedChunks: 3,
-    layerA: { passThreshold: 0 },
+    // Layer A = logistic regression (scorers/lr.ts, pipeline/lr/train.py). 0.25 = the trained
+    // threshold where ~25% of held-out human chunks pass and ~95% of AI chunks pass
+    // (eval/RESULTS_layerA_lr.md). Set to 0 to send every chunk to layer B again (ranking only).
+    layerA: { passThreshold: 0.25 },
     layerB: {
       enabled: true,
       threshold: 0.98,
@@ -81,6 +84,9 @@ export const config: DetectorsConfig = {
   // TODO(hack): dev-only map from saved demo pages to the real URLs they stand for.
   urlMap: {
     'google-coffee-grinder.html': 'https://www.google.com/search?q=best+coffee+grinder+2026',
+    // Real archived pages from the same junk sites (demo/pages/archive/); these get outlines.
+    'mayfairfarms-best-stanley-cups.html': 'https://www.mayfairfarms.com/best-stanley-cups/',
+    'peggyomara-best-coffee-makers.html': 'https://www.peggyomara.com/best-coffee-makers/',
     'mayfairfarms.html': 'https://www.mayfairfarms.com/?p=73153',
     'peggyomara.html': 'https://www.peggyomara.com/best-coffee-grinders/',
     'google-air-fryer.html': 'https://www.google.com/search?q=best+air+fryer+2026',

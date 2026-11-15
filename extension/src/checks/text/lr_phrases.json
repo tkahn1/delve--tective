@@ -1,0 +1,36 @@
+{
+  "_doc": "Layer A logistic regression phrase lists (shared by extension/src/checks/text/scorers/lr.ts and pipeline/lr/features.py). Matching is on word tokens (see tokens() in either file), whole-word on both sides. A trailing * on the LAST word means prefix match for that word only (e.g. delv* matches delve, delves, delving). Transitions count only as the first token(s) of a sentence. Change these lists only together with retraining (python pipeline/lr/train.py).",
+  "cliche": [
+    "in today's fast-paced world", "in today's digital age", "in today's world", "in the ever-evolving",
+    "ever-evolving landscape", "in the realm of", "game-changer", "game changer", "let's dive in",
+    "let's dive into", "dive into the world", "a testament to", "stands as a testament", "serves as a testament",
+    "plays a crucial role", "plays a pivotal role", "plays a vital role", "it's important to note",
+    "it is important to note", "it's worth noting", "it is worth noting", "unlock the full potential",
+    "unlock the potential", "elevate your", "take it to the next level", "look no further",
+    "without further ado", "rich tapestry", "a myriad of", "navigating the complexities",
+    "whether you're a seasoned", "whether you are a seasoned", "embark on", "in conclusion",
+    "in summary", "not only", "when it comes to choosing", "a must-have", "must-have"
+  ],
+  "roundup": [
+    "perfect for", "ideal for", "best for", "great for", "pros and cons", "pros", "cons",
+    "buying guide", "our top picks", "top picks", "our pick", "we've rounded up", "we have rounded up",
+    "in this article", "in this guide", "in this post", "whether you're", "whether you are",
+    "easy to clean", "easy to use", "value for money", "bang for your buck", "budget-friendly",
+    "hassle-free", "user-friendly", "high-quality", "top-notch", "durable", "sleek design",
+    "check price", "check latest price", "frequently asked questions", "faqs", "final thoughts",
+    "final verdict", "bottom line", "genuinely", "standout", "stands out", "worth considering",
+    "keep in mind", "factors to consider", "things to consider"
+  ],
+  "llm_words": [
+    "delv*", "underscor*", "showcas*", "meticulous*", "commendabl*", "intricat*", "tapestr*",
+    "testament", "realm", "pivotal", "seamless*", "versatil*", "multifaceted", "nuanced",
+    "foster*", "bolster*", "garner*", "notabl*", "comprehensive", "invaluable", "paramount",
+    "elevat*", "unparalleled", "unwavering", "robust", "leverag*", "streamlin*", "enhanc*",
+    "landscape", "vibrant", "bustling", "beacon", "endeavor*", "embark*", "harness*"
+  ],
+  "transitions": [
+    "moreover", "additionally", "furthermore", "in addition", "consequently", "ultimately",
+    "in conclusion", "to summarize", "in summary", "notably", "importantly", "overall,",
+    "however", "therefore", "thus", "hence"
+  ]
+}

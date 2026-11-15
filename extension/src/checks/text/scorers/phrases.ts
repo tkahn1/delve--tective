@@ -71,7 +71,7 @@ export function layerAFeatures(text: string): LayerAFeatures {
 const clamp01 = (x: number) => (x < 0 ? 0 : x > 1 ? 1 : x);
 
 // TODO(hack): weights hand-tuned; refit against the Python eval so ~20-30% of
-// human chunks clear config.text.layerA.passThreshold (0.3).
+// human chunks clear config.text.layerA.passThreshold (currently 0: layer A only ranks chunks).
 export function scoreFromFeatures(f: LayerAFeatures): number {
   const phrase = clamp01(f.phraseDensity / 2); // 2 hits per 100 words saturates
   const transition = clamp01(f.transitionRate / 0.25);
