@@ -81,18 +81,18 @@ export const TOOLTIP_CSS = `
 `;
 
 export const BADGE_CSS = `
-.badge { position: fixed; right: 16px; bottom: 16px; width: 260px; background: #FFFFFF; color: ${C.ink};
-  border: 1px solid ${C.border}; border-radius: 12px; padding: 12px 14px 12px;
-  box-shadow: 0 6px 20px rgba(24,24,27,.12); pointer-events: auto; }
+.badge { position: fixed; right: 16px; bottom: 16px; max-width: 340px; display: flex; align-items: center; gap: 8px;
+  background: rgba(255,255,255,.96); color: ${C.secondary}; border: 1px solid ${C.border}; border-radius: 999px;
+  padding: 5px 6px 5px 12px; font-size: 12px; line-height: 1.3; box-shadow: 0 2px 8px rgba(24,24,27,.08); pointer-events: auto; }
 .badge[hidden] { display: none; }
-.head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 0 0 8px; }
-.head h2 { font-family: ${FONT_HEAD}; font-weight: 600; font-size: 13px; margin: 0; color: ${C.ink}; }
-.x { color: ${C.secondary2}; width: 28px; height: 28px; margin: -6px -8px -6px 0; display: grid; place-items: center; border-radius: 6px; }
+.dot { width: 7px; height: 7px; border-radius: 50%; background: #D4A373; flex: none; }
+.badge.high .dot { background: ${C.flag}; }
+.t { font-weight: 600; color: ${C.ink}; flex: none; }
+.sum { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.sum::before { content: '·'; margin-right: 6px; color: ${C.border}; }
+.setup { color: ${C.secondary}; white-space: nowrap; }
+.setup[hidden], .sum[hidden], .all[hidden] { display: none; }
+.all { font-size: 12px; color: ${C.link}; text-decoration: underline; text-underline-offset: 2px; border-radius: 6px; flex: none; }
+.x { color: ${C.secondary2}; width: 24px; height: 24px; display: grid; place-items: center; border-radius: 50%; flex: none; }
 .x:hover { background: ${C.soft}; }
-.meter { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; margin: 0 0 8px; }
-.seg { height: 5px; border-radius: 3px; background: ${C.border}; }
-.seg.on { background: ${C.flag}; }
-.sum { font-size: 12px; color: ${C.secondary}; margin: 0 0 8px; }
-.all { font-size: 12px; font-weight: 600; color: ${C.link}; text-decoration: underline; text-underline-offset: 2px; border-radius: 6px; }
-.setup { font-size: 12px; color: ${C.secondary}; margin: 0; }
 `;
