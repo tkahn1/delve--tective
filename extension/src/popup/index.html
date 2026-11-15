@@ -80,8 +80,12 @@
         <span class="chevron" id="chevron"></span>
       </button>
 
-      <section class="section dev-row" aria-labelledby="dev-label">
-        <div class="label" id="dev-label">Developer</div>
+      <button type="button" class="section row link-row" id="dev-link" aria-expanded="false" aria-controls="dev-panel">
+        <span class="link-title">Developer options</span>
+        <span class="chevron dev-chevron" id="dev-chevron"></span>
+      </button>
+
+      <section class="section dev-row" id="dev-panel" hidden>
         <div class="row">
           <div class="site-text">
             <div class="dev-title">YouTube API key</div>

@@ -209,6 +209,13 @@ async function init(): Promise<void> {
       void refreshPage();
     }
   });
+  $('dev-chevron').innerHTML = chevronIcon(18);
+  $('dev-link').addEventListener('click', () => {
+    const link = $('dev-link');
+    const open = link.getAttribute('aria-expanded') !== 'true';
+    link.setAttribute('aria-expanded', String(open));
+    $('dev-panel').hidden = !open;
+  });
   $<HTMLInputElement>('yt-use-api').addEventListener('change', (e) => {
     void chrome.storage.local.set({ [YT_STORAGE.useApi]: (e.target as HTMLInputElement).checked });
   });
