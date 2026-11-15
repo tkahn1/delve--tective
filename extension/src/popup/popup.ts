@@ -11,6 +11,7 @@ import { fillReason, capitalize } from '../reasons/templates';
 import { summarize, type Stats } from '../storage/stats';
 import { registrableDomain } from '../util/domain';
 import { logoTile, chevronIcon } from '../ui/icons';
+import { YT_STORAGE } from '../checks/commentCopies/messages';
 
 const $ = <T extends HTMLElement = HTMLElement>(id: string): T => document.getElementById(id) as T;
 
@@ -208,7 +209,13 @@ async function init(): Promise<void> {
       void refreshPage();
     }
   });
+  $<HTMLInputElement>('yt-use-api').addEventListener('change', (e) => {
+    void chrome.storage.local.set({ [YT_STORAGE.useApi]: (e.target as HTMLInputElement).checked });
+  });
+  void refreshYtApi();
+
   chrome.storage.onChanged.addListener((changes, area) => {
+    if (area === 'local' && (changes[YT_STORAGE.apiKey] || changes[YT_STORAGE.useApi])) void refreshYtApi();
     if (area === 'local' && changes.stats) void refreshStats();
     if (area === 'session' && activeTabId != null && changes[`tab:${activeTabId}`]) void refreshPage();
   });
@@ -221,6 +228,21 @@ async function init(): Promise<void> {
   if (s) settings = s;
   renderSettings();
   await Promise.all([refreshPage(), refreshStats()]);
+}
+
+/** Developer row: whether YouTube comment copies use the saved API key (on) or YouTube's page requests (off). */
+async function refreshYtApi(): Promise<void> {
+  const s = await chrome.storage.local.get([YT_STORAGE.apiKey, YT_STORAGE.useApi]);
+  const hasKey = Boolean(String(s[YT_STORAGE.apiKey] ?? '').trim());
+  const useApi = s[YT_STORAGE.useApi] !== false;
+  const input = $<HTMLInputElement>('yt-use-api');
+  input.disabled = !hasKey;
+  input.checked = hasKey && useApi;
+  $('yt-api-status').textContent = !hasKey
+    ? 'No key saved. Add one in My sites.'
+    : useApi
+      ? 'In use: comments load 100 per page'
+      : 'Off: using YouTube page requests';
 }
 
 void init();

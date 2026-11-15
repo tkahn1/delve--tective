@@ -32,6 +32,8 @@ export default defineManifest({
     },
   ],
   permissions: ['storage', 'offscreen', 'tabs', 'activeTab', 'contextMenus'],
+  // Only used when the user saves a YouTube Data API key (comment copies, background/commentCopies.ts).
+  host_permissions: ['https://www.googleapis.com/*'],
   options_page: 'src/options/index.html',
   content_security_policy: {
     extension_pages: "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'",

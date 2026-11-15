@@ -98,3 +98,23 @@ Offscreen doc: `src/engine/offscreen.html`, reasons ['WORKERS'].
 
 ## UI in pages
 Everything injected lives in Shadow DOM roots. Fonts in shadow DOM: register via `new FontFace('UnslopInter', 'url(chrome-extension://.../x.woff2)')` + document.fonts.add (font files in web_accessible_resources).
+
+## YouTube comment copies (checks/commentCopies/, content/youtube/, background/commentCopies.ts, ui/commentFlag.ts)
+Flags each YouTube comment or reply that is repeated elsewhere on the same video, with how many times it appears
+("Repeated 15 times", or "AMS39K in 5 comments" for a shared promoted name). Covers the whole video, not just loaded comments.
+Separate from `combine`, the page/search reports and stats: nothing recorded, in memory per tab only.
+- **Loading:** content script, YouTube watch pages only, follows in-app navigation (`yt-navigate-finish` + URL poll).
+  1. If the user saved a YouTube Data API key (options page, `chrome.storage.local` `ytApiKey`; not part of `Settings`,
+     never broadcast), the SW fetches through `googleapis.com/youtube/v3` (100 per page; `host_permissions`).
+  2. Otherwise, or if the API fails (quota, comments off), the content script uses YouTube's own `/youtubei/v1/next`
+     requests (same origin, 20 per page): top-level pages in "Newest first" order (the default "Top comments" order
+     stops after a few hundred), reply threads 8 at a time alongside. No fixed delay; shared back-off on 429/5xx.
+     Undocumented interface, can break when YouTube changes.
+  Hidden developer toggle `ytUseApi` (options page: click the "YouTube comments" heading 5 times) forces step 2.
+- **Grouping** (`group.ts`, runs in the SW over port `'comment-copies'`, messages in `messages.ts`): exact copies after
+  normalising; near copies (word-set Jaccard >= 0.6, 5+ meaningful words, candidates from shared uncommon words);
+  campaigns (a letters+digits name or $TICKER from 3+ accounts). Quick capped passes while loading, full pass at the end.
+- **Measured** (2026-11-15, 11,380-comment video): 39 s page requests, 15 s with a key (548 API calls of 10,000/day);
+  ~5,700 comments in ~1,060 groups; one page freeze over 200 ms during the scan.
+- **Config:** `config.commentCopies`. **Wording:** describes what was seen ("appears 15 times on this video, from 14 accounts"),
+  never intent. Not yet reviewed by Toby.

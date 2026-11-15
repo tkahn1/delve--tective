@@ -79,6 +79,20 @@
         </span>
         <span class="chevron" id="chevron"></span>
       </button>
+
+      <section class="section dev-row" aria-labelledby="dev-label">
+        <div class="label" id="dev-label">Developer</div>
+        <div class="row">
+          <div class="site-text">
+            <div class="dev-title">YouTube API key</div>
+            <div class="helper" id="yt-api-status">Checking…</div>
+          </div>
+          <label class="switch" title="Use the saved YouTube Data API key for comment copies">
+            <input type="checkbox" id="yt-use-api" role="switch" aria-label="Use YouTube API key" aria-describedby="yt-api-status" />
+            <span class="track"><span class="thumb"></span></span>
+          </label>
+        </div>
+      </section>
     </main>
     <script type="module" src="./popup.ts"></script>
   </body>

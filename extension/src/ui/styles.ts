@@ -92,3 +92,22 @@ export const BADGE_CSS = `
 .all { font-size: 12px; font-weight: 600; color: ${C.link}; text-decoration: underline; text-underline-offset: 2px; border-radius: 6px; }
 .setup { font-size: 12px; color: ${C.secondary}; margin: 0; }
 `;
+
+/** Pill beside a YouTube comment's author line: "Repeated 15 times". Hover/focus shows COPY_TIP_CSS. */
+export const COMMENT_FLAG_CSS = `
+:host { display: inline-block; }
+.flag { display: inline-flex; align-items: center; gap: 6px; background: ${C.flagTint}; color: ${C.flagText};
+  border-radius: 999px; padding: 1px 9px 1px 8px; font-size: 11.5px; font-weight: 500; line-height: 18px;
+  white-space: nowrap; cursor: help; }
+.flag .dot { width: 6px; height: 6px; border-radius: 50%; background: ${C.flag}; flex: none; }
+.flag b { font-family: ${FONT_HEAD}; font-weight: 600; }
+`;
+
+export const COPY_TIP_CSS = `
+.tip { position: absolute; width: max-content; max-width: 240px; background: ${C.ink}; color: #FFFFFF; border-radius: 8px;
+  padding: 8px 10px; box-shadow: 0 6px 16px rgba(0,0,0,.16); pointer-events: none; font-size: 12px; line-height: 1.4; }
+.tip[hidden] { display: none; }
+.tip .t { font-family: ${FONT_HEAD}; font-weight: 600; font-size: 12px; margin: 0 0 2px; color: #FFFFFF; }
+.tip .r { margin: 0 0 6px; color: #FFFFFF; }
+.tip .fine { color: #A1A1AA; font-size: 10.5px; margin: 0; }
+`;

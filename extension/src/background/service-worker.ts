@@ -6,6 +6,7 @@ import { combine, levelAtLeast } from '../combine/combine';
 import { isAllowlisted, registrableDomain } from '../util/domain';
 import { resolveUrl } from '../content/urlmap';
 import { getStats, recordPage, recordResults } from '../storage/stats';
+import { registerCommentCopies } from './commentCopies';
 import {
   DEFAULT_SETTINGS,
   PAGE_CHECK_PORT,
@@ -468,6 +469,9 @@ async function handlePageCheck(port: chrome.runtime.Port, input: PageInput): Pro
     await finishPage(p);
   }
 }
+
+// YouTube comment copies (own port; see background/commentCopies.ts).
+registerCommentCopies();
 
 chrome.runtime.onConnect.addListener((port) => {
   if (port.name !== PAGE_CHECK_PORT) return;
