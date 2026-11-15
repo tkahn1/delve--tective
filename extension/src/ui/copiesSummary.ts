@@ -1,8 +1,9 @@
-// Summary card at the top of a comment section (YouTube video, Reddit thread): how many comments are
-// repeats, and the most repeated ones with a short sample. Lives in a shadow root; re-attached if the site
-// re-renders its comment section. Hidden when nothing is repeated.
+// Summary at the top of a comment section (YouTube video, Reddit thread). Collapsed it is one slim line
+// ("5,704 of 11,380 comments are repeats, in 1,068 groups"); hovering, focusing or clicking it expands it
+// smoothly to the most repeated comments. Click pins it open (touch, keyboard). Lives in a shadow root,
+// is re-attached if the site re-renders its comment section, and stays hidden when nothing is repeated.
 import type { CopyGroup } from '../checks/commentCopies/types';
-import { closeIcon } from './icons';
+import { chevronIcon, closeIcon } from './icons';
 import { createShadowHost, h } from './shadow';
 import { COPIES_SUMMARY_CSS } from './styles';
 
@@ -19,7 +20,7 @@ export interface SummaryView {
   groups: CopyGroup[];
   loaded: number;
   loading: boolean;
-  /** Text and author of a comment id, for the samples. */
+  /** Text of a comment id, for the samples. */
   sampleOf(id: string): string | undefined;
 }
 
@@ -35,27 +36,34 @@ const kindLabel = (g: CopyGroup): string =>
 export function createCopiesSummary(where: string, placement: () => SummaryPlacement | null): CopiesSummary {
   const sh = createShadowHost(COPIES_SUMMARY_CSS, 'display:block;');
   sh.host.setAttribute('data-unslop-copies-summary', '');
-  const close = h('button', { class: 'x', type: 'button', 'aria-label': 'Hide summary', html: closeIcon(14) });
-  const sum = h('p', { class: 'sum' });
+  const line = h('span', { class: 'line' });
+  const toggle = h('button', { class: 'toggle', type: 'button', 'aria-expanded': 'false', 'aria-controls': 'copies-body' },
+    h('span', { class: 'dot', 'aria-hidden': 'true' }), line, h('span', { class: 'chev', html: chevronIcon(14) }));
+  const close = h('button', { class: 'x', type: 'button', 'aria-label': 'Hide repeated comments summary', html: closeIcon(12) });
   const list = h('ul', { class: 'list' });
   const card = h('section', { class: 'u card', 'aria-label': 'Repeated comments' },
-    h('div', { class: 'head' }, h('h2', {}, 'Repeated comments'), close),
-    sum,
-    list,
-    h('p', { class: 'fine' }, 'Each repeated comment is marked below. Worth a second look. Checks can be wrong.'),
+    h('div', { class: 'bar' }, toggle, close),
+    h('div', { class: 'body', id: 'copies-body' },
+      h('div', { class: 'inner' },
+        list,
+        h('p', { class: 'fine' }, 'Each repeated comment is marked below. Worth a second look. Checks can be wrong.'))),
   );
   sh.root.appendChild(card);
 
   let dismissed = false;
   let visible = false;
+  toggle.addEventListener('click', () => {
+    const open = !card.classList.contains('open');
+    card.classList.toggle('open', open);
+    toggle.setAttribute('aria-expanded', String(open));
+  });
   close.addEventListener('click', () => {
     dismissed = true;
     sh.host.remove();
   });
 
   const attach = () => {
-    if (!visible || dismissed) return;
-    if (sh.host.isConnected) return;
+    if (!visible || dismissed || sh.host.isConnected) return;
     const p = placement();
     if (p) p.parent.insertBefore(sh.host, p.before);
   };
@@ -72,15 +80,15 @@ export function createCopiesSummary(where: string, placement: () => SummaryPlace
 
   return {
     update(v) {
-      const repeats = v.groups.reduce((a, g) => a + g.ids.length, 0);
       visible = v.groups.length > 0;
       if (!visible) {
         sh.host.remove();
         return;
       }
-      sum.textContent = '';
-      sum.append(h('b', {}, repeats.toLocaleString()), ` of ${v.loaded.toLocaleString()} comments ${where} are repeats, in `,
-        h('b', {}, v.groups.length.toLocaleString()), v.groups.length === 1 ? ' group' : ' groups', v.loading ? ' (still checking)' : '', '.');
+      const repeats = v.groups.reduce((a, g) => a + g.ids.length, 0);
+      line.textContent = '';
+      line.append(h('b', {}, repeats.toLocaleString()), ` of ${v.loaded.toLocaleString()} comments ${where} are repeats, in `,
+        h('b', {}, v.groups.length.toLocaleString()), v.groups.length === 1 ? ' group' : ' groups', v.loading ? ' · checking…' : '');
       list.textContent = '';
       for (const g of v.groups.slice(0, TOP)) {
         const raw = (v.sampleOf(g.ids[0]) ?? '').replace(/\s+/g, ' ').trim();
@@ -96,6 +104,8 @@ export function createCopiesSummary(where: string, placement: () => SummaryPlace
     clear() {
       visible = false;
       dismissed = false;
+      card.classList.remove('open');
+      toggle.setAttribute('aria-expanded', 'false');
       sh.host.remove();
     },
     destroy() {

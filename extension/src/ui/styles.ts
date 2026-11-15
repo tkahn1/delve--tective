@@ -41,7 +41,7 @@ export const SEARCH_CSS = `
   border-radius: 10px; padding: 10px 14px; margin: 0 0 18px; max-width: 652px; font-size: 13px; }
 .bar .ico { color: ${C.flag}; }
 .bar .txt { flex: 1; min-width: 0; }
-.bar b { font-weight: 600; }
+.toggle b { font-weight: 600; }
 .bar .flip { color: ${C.flagText}; text-decoration: underline; text-underline-offset: 2px; font-weight: 500;
   min-height: 32px; padding: 0 4px; white-space: nowrap; border-radius: 6px; }
 .reason { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 6px; margin: 6px 0 2px;
@@ -112,21 +112,35 @@ export const COPY_TIP_CSS = `
 .tip .fine { color: #A1A1AA; font-size: 10.5px; margin: 0; }
 `;
 
-/** Card at the top of a comment section: the most repeated comments on the page. */
+/** Summary at the top of a comment section: one slim line that expands to the top repeats on hover/focus/click. */
 export const COPIES_SUMMARY_CSS = `
-.card { background: ${C.flagTint}; color: ${C.ink}; border: 1px solid ${C.border}; border-radius: 10px;
-  padding: 12px 14px; margin: 0 0 16px; max-width: 760px; }
-.head { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
-.head h2 { font-family: ${FONT_HEAD}; font-weight: 600; font-size: 14px; margin: 0; color: ${C.ink}; }
-.sum { font-size: 12.5px; color: ${C.secondary}; margin: 2px 0 8px; }
-.sum b { font-family: ${FONT_HEAD}; font-weight: 600; color: ${C.flagText}; }
-.x { color: ${C.secondary2}; width: 28px; height: 28px; margin: -6px -8px 0 0; display: grid; place-items: center; border-radius: 6px; flex: none; }
+:host { display: block; }
+.card { width: min(100%, 560px); margin: 0 0 14px; background: ${C.flagTint}; color: ${C.ink};
+  border: 1px solid ${C.border}; border-radius: 8px; overflow: hidden;
+  transition: box-shadow 160ms ease, border-color 160ms ease; }
+.card.open, .card:hover, .card:focus-within { border-color: #d4c3ab; box-shadow: 0 4px 14px rgba(41,35,31,.08); }
+.bar { display: flex; align-items: center; gap: 4px; padding: 3px 4px 3px 10px; min-height: 30px; }
+.toggle { flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; min-height: 24px;
+  font-size: 12.5px; color: ${C.flagText}; text-align: left; }
+.toggle .dot { width: 6px; height: 6px; border-radius: 50%; background: ${C.flag}; flex: none; }
+.toggle .line { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.toggle b { font-family: ${FONT_HEAD}; font-weight: 600; }
+.toggle .chev { color: ${C.secondary2}; transition: transform 200ms ease; }
+.card.open .chev, .card:hover .chev, .card:focus-within .chev { transform: rotate(90deg); }
+.x { color: ${C.secondary2}; width: 24px; height: 24px; display: grid; place-items: center; border-radius: 6px; flex: none; }
 .x:hover { background: ${C.soft}; }
+/* Expands by animating the row height from 0fr to 1fr; collapses after a short delay so it doesn't flicker. */
+.body { display: grid; grid-template-rows: 0fr; opacity: 0;
+  transition: grid-template-rows 220ms ease 120ms, opacity 160ms ease 120ms; }
+.card.open .body, .card:hover .body, .card:focus-within .body { grid-template-rows: 1fr; opacity: 1;
+  transition: grid-template-rows 220ms ease, opacity 180ms ease 40ms; }
+.inner { min-height: 0; overflow: hidden; padding: 0 12px; }
 .list { list-style: none; margin: 0; padding: 0; }
-.list li { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 2px 10px; align-items: baseline;
+.list li { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 1px 10px; align-items: baseline;
   padding: 6px 0; border-top: 1px solid ${C.border}; }
 .n { font-family: ${FONT_HEAD}; font-weight: 600; font-size: 13px; color: ${C.flagText}; min-width: 34px; }
-.txt { font-size: 13px; color: ${C.ink}; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.meta { grid-column: 2; font-size: 11.5px; color: ${C.dimmed}; }
-.fine { font-size: 11px; color: ${C.dimmed}; margin: 8px 0 0; }
+.txt { font-size: 12.5px; color: ${C.ink}; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.meta { grid-column: 2; font-size: 11px; color: ${C.dimmed}; }
+.fine { font-size: 10.5px; color: ${C.dimmed}; margin: 2px 0 10px; }
+@media (prefers-reduced-motion: reduce) { .card, .body, .toggle .chev { transition: none !important; } }
 `;
