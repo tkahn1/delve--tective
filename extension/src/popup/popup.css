@@ -137,3 +137,4 @@ body{width:360px;background:#faf7f1;font-size:13px}.header{padding:14px 20px;min
 .copies{margin-top:12px;padding-top:10px;border-top:1px dashed var(--border)}#page-body:empty+.copies{margin-top:0;padding-top:0;border-top:0}
 .copies-label{font-size:11px;font-weight:500;color:var(--secondary-2);margin-bottom:2px}.copies-sub{margin:2px 0 0}
 .mode-help{margin-top:6px}
+.sens-help{display:grid;gap:1px}.sens-lead{font-weight:600;color:var(--secondary)}

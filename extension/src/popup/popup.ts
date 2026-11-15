@@ -120,7 +120,37 @@ function renderSettings(): void {
     b.classList.toggle('active', on);
     b.setAttribute('aria-checked', String(on));
   });
+  renderSensHelp(settings.sensitivity ?? 'balanced');
   document.body.classList.toggle('off', !settings.enabled);
+}
+
+/** What the selected Sensitivity does, for pages and for comments (matches service-worker.ts and keepGroup). */
+const SENS_HELP: Record<Settings['sensitivity'], { lead: string; pages: string; comments: string }> = {
+  relaxed: {
+    lead: 'Fewest flags.',
+    pages: 'only known junk sites and copied articles.',
+    comments: 'only ones posted word for word 3 or more times.',
+  },
+  balanced: {
+    lead: 'Recommended.',
+    pages: 'suspect paragraphs are outlined when the page already looks like junk.',
+    comments: 'any comment posted more than once.',
+  },
+  strict: {
+    lead: 'Most flags, more false alarms.',
+    pages: 'suspect paragraphs are outlined on any site.',
+    comments: 'also catches reworded copies.',
+  },
+};
+
+function renderSensHelp(s: Settings['sensitivity']): void {
+  const help = SENS_HELP[s] ?? SENS_HELP.balanced;
+  const box = $('sens-help');
+  box.replaceChildren(
+    el('span', 'sens-lead', help.lead),
+    el('span', 'sens-line', `Pages: ${help.pages}`),
+    el('span', 'sens-line', `Comments: ${help.comments}`),
+  );
 }
 
 async function setSettings(patch: Partial<Settings>): Promise<void> {
