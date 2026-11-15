@@ -32,6 +32,10 @@ svg { display: block; flex: none; }
 /** Injected into the page document (not a shadow root) to restyle Google's own result nodes. */
 export const PAGE_CSS = `
 [data-unslop-dim], [data-unslop-dim] * { color: ${C.dimmed} !important; }
+/* Make dimmed results obvious at a glance: shaded box (shadow spread, so no layout shift)
+   and faded thumbnails and favicons. The reason line stays full strength. */
+[data-unslop-dim] { background: #F4F4F5 !important; box-shadow: 0 0 0 10px #F4F4F5 !important; border-radius: 6px !important; }
+[data-unslop-dim] img, [data-unslop-dim] svg, [data-unslop-dim] video { opacity: 0.35 !important; filter: grayscale(1) !important; }
 [data-unslop-dim] [data-unslop-ui] { color: initial !important; }
 [data-unslop-hidden] { display: none !important; }
 `;
