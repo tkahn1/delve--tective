@@ -156,6 +156,33 @@ export function startSearch(url: string, initial: Settings): Controller {
 
   void scan();
 
+  // Back/forward cache: the service worker cleared this tab's state on navigation; re-send what we
+  // already annotated so the popup and toolbar count come back.
+  async function resync() {
+    if (destroyed || !items.length) return;
+    const siblings = items.map((it) => ({ title: it.res.title, domain: it.res.domain }));
+    const results: PageInput[] = items.map((it) => ({
+      target: 'result',
+      url: it.res.url,
+      domain: it.res.domain,
+      title: it.res.title,
+      query,
+      siblings,
+    }));
+    try {
+      const resp = (await chrome.runtime.sendMessage({ type: 'search/check', results })) as SearchCheckResponse | undefined;
+      const verdicts = resp?.verdicts ?? [];
+      items.forEach((it, i) => (it.verdict = verdicts[i] ?? it.verdict));
+    } catch (err) {
+      console.debug('[unslop] search resync failed', err);
+    }
+    render();
+  }
+  const onPageShow = (e: PageTransitionEvent) => {
+    if (e.persisted) void resync();
+  };
+  window.addEventListener('pageshow', onPageShow);
+
   return {
     update(s) {
       const modeChanged = s.mode !== settings.mode;
@@ -165,6 +192,7 @@ export function startSearch(url: string, initial: Settings): Controller {
     },
     destroy() {
       destroyed = true;
+      window.removeEventListener('pageshow', onPageShow);
       observer.disconnect();
       clearTimeout(timer);
       for (const it of items) clearResultLook(it);

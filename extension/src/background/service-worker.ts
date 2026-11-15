@@ -420,6 +420,8 @@ async function handlePageCheck(port: chrome.runtime.Port, input: PageInput): Pro
   };
   pending.set(reqId, p);
   port.onDisconnect.addListener(() => {
+    // Reading lastError marks it handled (e.g. "page moved into back/forward cache").
+    void chrome.runtime.lastError;
     if (!p.finished) {
       p.finished = true;
       clearTimeout(p.timer);

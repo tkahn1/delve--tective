@@ -144,12 +144,27 @@ export function startPage(url: string, domain: string, _initial: Settings): Cont
     if (!destroyed) run();
   });
 
+  // Back/forward cache: Chrome closes extension ports when the page is cached. Close ours first,
+  // and re-run the check when the page is restored (the service worker cleared this tab's state).
+  const onPageHide = (e: PageTransitionEvent) => {
+    if (!e.persisted) return;
+    port?.disconnect();
+    port = null;
+  };
+  const onPageShow = (e: PageTransitionEvent) => {
+    if (e.persisted && !destroyed) run();
+  };
+  window.addEventListener('pagehide', onPageHide);
+  window.addEventListener('pageshow', onPageShow);
+
   return {
     update() {
       /* page UI doesn't depend on mode; enabled/disabled handled by index.ts */
     },
     destroy() {
       destroyed = true;
+      window.removeEventListener('pagehide', onPageHide);
+      window.removeEventListener('pageshow', onPageShow);
       port?.disconnect();
       port = null;
       outline?.remove();
