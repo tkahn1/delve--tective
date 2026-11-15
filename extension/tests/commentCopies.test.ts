@@ -95,3 +95,36 @@ describe('flag wording', () => {
     for (const s of [exact.detail, camp.detail, exact.title, camp.title]) expect(s).not.toMatch(/fake|bot|AI/i);
   });
 });
+
+describe('reddit collect', () => {
+  // Made-up data in the shape of <origin>/comments/<id>.json and /api/morechildren.json.
+  const t1 = (id: string, author: string, body: string, parent: string, replies: unknown = '') =>
+    ({ kind: 't1', data: { id, name: `t1_${id}`, author, body, parent_id: parent, replies } });
+  const listing = (...children: unknown[]) => ({ kind: 'Listing', data: { children } });
+
+  it('walks nested replies, skips deleted, queues load-more and continue-thread placeholders', async () => {
+    const { collect } = await import('../src/content/reddit/fetch');
+    const tree = [
+      t1('a', 'alice', 'Top comment', 't3_post', listing(
+        t1('b', 'bob', 'A reply', 't1_a', listing(
+          { kind: 'more', data: { id: '_', name: 't1__', parent_id: 't1_b', count: 0, children: [] } },
+        )),
+        t1('c', '[deleted]', '[deleted]', 't1_a'),
+      )),
+      t1('d', 'dan', '[removed]', 't3_post'),
+      { kind: 'more', data: { id: 'x1', name: 't1_x1', parent_id: 't3_post', count: 3, children: ['x1', 'x2', 'x3'] } },
+    ];
+    const out: VideoComment[] = [];
+    const more: string[] = [];
+    const deep: string[] = [];
+    collect(tree, out, more, deep);
+    expect(out.map((c) => [c.id, c.reply])).toEqual([['t1_a', false], ['t1_b', true]]);
+    expect(more).toEqual(['x1', 'x2', 'x3']);
+    expect(deep).toEqual(['b']);
+  });
+
+  it('describes Reddit groups "in this thread"', () => {
+    const d = describeFlag({ kind: 'exact', label: null, ids: ['t1_a', 't1_b'], authors: 2 }, 'in this thread');
+    expect(d.detail).toBe('The same comment appears 2 times in this thread, from 2 accounts.');
+  });
+});

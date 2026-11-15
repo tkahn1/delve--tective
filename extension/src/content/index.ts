@@ -5,7 +5,9 @@ import { startPage } from './page';
 import { startSearch, type Controller } from './search';
 import { resolveUrl, searchEngineOf } from './urlmap';
 import { config } from '../config/detectors.config';
-import { isYouTube, startYouTubeCopies } from './youtube/controller';
+import { startCommentCopies } from './copies/controller';
+import { isReddit, redditSite } from './reddit/site';
+import { isYouTube, youtubeSite } from './youtube/site';
 
 function siteDisabled(s: Settings, domain: string, hostname: string): boolean {
   const list = (s.disabledSites ?? []).map((d) => d.toLowerCase().replace(/^www\./, ''));
@@ -40,9 +42,16 @@ async function main() {
   const kind: 'search' | 'page' = engine ? 'search' : 'page';
 
   let controller: Controller | null = null;
-  // YouTube comment copies run alongside the page controller, under the same on/off switches.
+  // Comment copies (YouTube videos, Reddit threads) run alongside the page controller, under the same switches.
   let copies: Controller | null = null;
-  const wantCopies = config.commentCopies.enabled && isYouTube(hostname);
+  const cc = config.commentCopies;
+  const copiesSite = !cc.enabled
+    ? null
+    : isYouTube(hostname)
+      ? youtubeSite
+      : isReddit(hostname) && cc.reddit
+        ? redditSite
+        : null;
   let listsKey = '';
   const apply = (s: Settings) => {
     // Marking/trusting a site or changing sensitivity changes verdicts: start the check again.
@@ -60,7 +69,7 @@ async function main() {
       copies = null;
       return;
     }
-    if (wantCopies && !copies) copies = startYouTubeCopies(s);
+    if (copiesSite && !copies) copies = startCommentCopies(copiesSite);
     if (controller) controller.update(s);
     else controller = kind === 'search' ? startSearch(url, s, engine ?? 'google') : startPage(url, domain, s);
   };

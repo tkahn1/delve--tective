@@ -35,9 +35,11 @@ export interface DetectorsConfig {
       aiLabels: string[];
     };
   };
-  /** YouTube comment copies: repeated comments across a whole video (see CONTRACT.md). */
+  /** Comment copies: repeated comments across a whole YouTube video or Reddit thread (see CONTRACT.md). */
   commentCopies: {
     enabled: boolean;
+    reddit: boolean; // also run on Reddit threads
+    redditWorkers: number; // Reddit "load more" requests at once (Reddit rate-limits)
     maxComments: number; // top-level comments per video
     maxReplies: number;
     replyWorkers: number; // parallel reply threads, page requests
@@ -99,6 +101,8 @@ export const config: DetectorsConfig = {
   // Measured 2026-11-15 on an 11,380-comment video: 39 s with page requests, 15 s with an API key.
   commentCopies: {
     enabled: true,
+    reddit: true, // TODO(hack): not yet checked on live Reddit
+    redditWorkers: 2,
     maxComments: 10000,
     maxReplies: 20000,
     replyWorkers: 8,

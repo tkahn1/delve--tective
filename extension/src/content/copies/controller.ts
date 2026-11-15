@@ -1,57 +1,41 @@
-// YouTube comment copies: on a watch page, loads every comment and reply in the background, has the
-// service worker group the copies, and flags each repeated comment on screen with how many times it appears.
-// Order of sources: official API through the worker when the user saved a key (100 per page), else
-// YouTube's own page requests (20 per page). Follows YouTube's in-app navigation between videos.
+// Comment copies on any supported site (YouTube videos, Reddit threads): loads every comment in the
+// background, has the service worker group the copies, and flags each repeated comment on screen with how
+// many times it appears. A CopiesSite says how to recognise a page, fetch its comments and place flags.
 import { COMMENT_COPIES_PORT, type CopiesRequest, type CopiesResponse } from '../../checks/commentCopies/messages';
 import type { CopyGroup, VideoComment } from '../../checks/commentCopies/types';
 import { config } from '../../config/detectors.config';
-import type { Settings } from '../../engine/messages';
-import { createCommentFlags } from '../../ui/commentFlag';
+import { createCommentFlags, type FlagSite } from '../../ui/commentFlag';
 import type { Controller } from '../search';
-import { fetchAllComments } from './innertube';
 
-export function isYouTube(hostname: string): boolean {
-  return /(^|\.)youtube\.com$/i.test(hostname);
+export interface FetchOptions {
+  isLive(): boolean;
+  onComments(comments: VideoComment[]): void;
 }
 
-const videoIdOf = (href: string): string | null => {
-  try {
-    const u = new URL(href);
-    return u.pathname === '/watch' ? u.searchParams.get('v') : null;
-  } catch {
-    return null;
-  }
-};
+export interface CopiesSite {
+  name: string;
+  /** Page id (video id, post id) for this URL, or null when the page has no comments to check. */
+  pageId(href: string): string | null;
+  /** Ask the service worker to try the official API first (YouTube with a saved key). */
+  tryApi: boolean;
+  /** DOM event the site fires on in-app navigation, if any (the URL is also polled). */
+  navEvent?: string;
+  fetchAll(id: string, o: FetchOptions): Promise<void>;
+  flags: FlagSite;
+}
 
 interface Scan {
   run: number;
-  videoId: string;
   comments: VideoComment[];
   seen: Set<string>;
   sent: number;
-  done: boolean;
-  source: 'api' | 'page' | null;
   apiResolve: ((status: string) => void) | null;
   finalApplied: boolean;
 }
 
-/** Debug view for testing in DevTools: window.__unslopCopies (content-script world). */
-export interface CopiesDebug {
-  videoId: string;
-  comments: number;
-  replies: number;
-  groups: number;
-  flagged: number;
-  source: string | null;
-  apiNote: string | null;
-  done: boolean;
-  secs: number;
-  error: string | null;
-}
-
-export function startYouTubeCopies(_initial: Settings): Controller {
+export function startCommentCopies(site: CopiesSite): Controller {
   const cfg = config.commentCopies;
-  const flags = createCommentFlags(cfg.minFlagCount);
+  const flags = createCommentFlags(site.flags, cfg.minFlagCount);
   let run = 0;
   let scan: Scan | null = null;
   let port: chrome.runtime.Port | null = null;
@@ -59,9 +43,6 @@ export function startYouTubeCopies(_initial: Settings): Controller {
   let busy = false;
   let lastGroup = 0;
   let destroyed = false;
-  const debug: CopiesDebug = { videoId: '', comments: 0, replies: 0, groups: 0, flagged: 0, source: null, apiNote: null, done: false, secs: 0, error: null };
-  (window as unknown as { __unslopCopies?: CopiesDebug }).__unslopCopies = debug;
-  let t0 = 0;
 
   const send = (msg: CopiesRequest): boolean => {
     try {
@@ -72,7 +53,7 @@ export function startYouTubeCopies(_initial: Settings): Controller {
         port.onDisconnect.addListener(() => {
           port = null;
           busy = false;
-          // Worker restarted: an API scan in flight is lost, continue with page requests.
+          // Worker restarted: an API scan in flight is lost, continue with the site's own requests.
           if (scan?.apiResolve) {
             const r = scan.apiResolve;
             scan.apiResolve = null;
@@ -91,8 +72,6 @@ export function startYouTubeCopies(_initial: Settings): Controller {
   const applyGroups = (groups: CopyGroup[]) => {
     const byId = new Map<string, CopyGroup>();
     for (const g of groups) for (const id of g.ids) byId.set(id, g);
-    debug.groups = groups.length;
-    debug.flagged = groups.reduce((a, g) => a + (g.ids.length >= cfg.minFlagCount ? g.ids.length : 0), 0);
     flags.update(byId);
   };
 
@@ -122,12 +101,10 @@ export function startYouTubeCopies(_initial: Settings): Controller {
       if (!c.id || s.seen.has(c.id)) continue;
       s.seen.add(c.id);
       s.comments.push(c);
-      if (c.reply) debug.replies++;
-      else debug.comments++;
     }
   };
 
-  /** Send new comments to the worker and ask for groups: quick passes while scanning, one full pass at the end. */
+  /** Send new comments to the worker and ask for groups: quick passes while loading, one full pass at the end. */
   function regroup(final: boolean) {
     const s = scan;
     if (!s) return;
@@ -151,36 +128,29 @@ export function startYouTubeCopies(_initial: Settings): Controller {
     send({ type: 'copies/group', run: s.run, final: false });
   }
 
-  async function start(videoId: string) {
+  async function start(id: string) {
     const myRun = ++run;
     const live = () => myRun === run && !destroyed;
     flags.clear();
-    scan = { run: myRun, videoId, comments: [], seen: new Set(), sent: 0, done: false, source: null, apiResolve: null, finalApplied: false };
-    Object.assign(debug, { videoId, comments: 0, replies: 0, groups: 0, flagged: 0, source: null, apiNote: null, done: false, secs: 0, error: null });
-    t0 = Date.now();
-    const s = scan;
+    const s: Scan = { run: myRun, comments: [], seen: new Set(), sent: 0, apiResolve: null, finalApplied: false };
+    scan = s;
 
-    // 1. Official API through the worker, when a key is saved.
-    s.source = 'api';
-    debug.source = 'api';
-    const status = await new Promise<string>((resolve) => {
-      s.apiResolve = resolve;
-      if (!send({ type: 'copies/apiScan', run: myRun, videoId })) {
-        s.apiResolve = null;
-        resolve('worker unavailable');
-      }
-    });
-    if (!live()) return;
+    // 1. Official API through the worker, when the site has one and a key is saved.
+    let status = 'no api';
+    if (site.tryApi) {
+      status = await new Promise<string>((resolve) => {
+        s.apiResolve = resolve;
+        if (!send({ type: 'copies/apiScan', run: myRun, videoId: id })) {
+          s.apiResolve = null;
+          resolve('worker unavailable');
+        }
+      });
+      if (!live()) return;
+    }
+    // 2. The site's own requests. Comments already loaded through the API are skipped.
     if (status !== 'done') {
-      debug.apiNote = status; // 'nokey', 'disabled' or the API's error reason
-      // 2. YouTube's own page requests. Comments already loaded through the API are skipped.
-      s.source = 'page';
-      debug.source = 'page';
       try {
-        await fetchAllComments(videoId, {
-          maxComments: cfg.maxComments,
-          maxReplies: cfg.maxReplies,
-          replyWorkers: cfg.replyWorkers,
+        await site.fetchAll(id, {
           isLive: live,
           onComments: (list) => {
             addComments(list);
@@ -188,21 +158,18 @@ export function startYouTubeCopies(_initial: Settings): Controller {
           },
         });
       } catch (e) {
-        if (live()) debug.error = String((e as Error).message ?? e);
+        if (live()) console.warn(`[unslop] ${site.name} comments stopped:`, (e as Error).message ?? e);
       }
     }
     if (!live()) return;
-    s.done = true;
-    debug.done = true;
-    debug.secs = (Date.now() - t0) / 1000;
     regroup(true);
   }
 
-  // Follow YouTube's in-app navigation (no full page load between videos).
+  // Follow in-app navigation (no full page load between videos or threads).
   let current: string | null = null;
   const check = () => {
     if (destroyed) return;
-    const id = videoIdOf(location.href);
+    const id = site.pageId(location.href);
     if (id === current) return;
     current = id;
     run++; // stops any scan in flight
@@ -210,18 +177,18 @@ export function startYouTubeCopies(_initial: Settings): Controller {
     flags.clear();
     if (id) void start(id);
   };
-  document.addEventListener('yt-navigate-finish', check);
+  if (site.navEvent) document.addEventListener(site.navEvent, check);
   const poll = window.setInterval(check, 1000);
   check();
 
   return {
     update() {
-      /* nothing depends on the shared settings beyond on/off, handled by the caller */
+      /* only on/off matters, handled by the caller */
     },
     destroy() {
       destroyed = true;
       run++;
-      document.removeEventListener('yt-navigate-finish', check);
+      if (site.navEvent) document.removeEventListener(site.navEvent, check);
       window.clearInterval(poll);
       flags.destroy();
       try {

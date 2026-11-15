@@ -1,14 +1,25 @@
-// Flags on YouTube comments that are repeated elsewhere on the video: a small pill after the author
-// line ("Repeated 15 times"), with a dark hover box that says what was seen. Each pill lives in its own
-// shadow root, so YouTube's CSS can't reach it. Works for top-level comments and replies.
+// Flags on comments that are repeated elsewhere on the same page (YouTube video, Reddit thread): a small
+// pill after the author line ("Repeated 15 times"), with a dark hover box that says what was seen. Each
+// pill lives in its own shadow root, so the site's CSS can't reach it. Where it goes is up to a FlagSite.
 import type { CopyGroup } from '../checks/commentCopies/types';
 import { createShadowHost, h } from './shadow';
 import { COMMENT_FLAG_CSS, COPY_TIP_CSS } from './styles';
 
-const COMMENT_SEL = 'ytd-comments ytd-comment-view-model, ytd-comments ytd-comment-renderer';
 const HOST_ATTR = 'data-unslop-copies';
 const TIP_GAP = 8;
 const HIDE_DELAY_MS = 150;
+
+/** How one site exposes its comments in the page. */
+export interface FlagSite {
+  /** "on this video", "in this thread" */
+  where: string;
+  /** Every comment element currently in the page (top-level and replies). */
+  nodes(): Iterable<Element>;
+  /** The comment id, same form as VideoComment.id. */
+  idOf(node: Element): string | null;
+  /** Element the pill is appended to (this comment's own header, not a nested reply's). */
+  headerOf(node: Element): Element | null;
+}
 
 export interface FlagCopy {
   title: string;
@@ -17,14 +28,14 @@ export interface FlagCopy {
 }
 
 /** Wording: describes what was seen, never intent ("worth a second look", not "fake" or "bot"). */
-export function describe(g: CopyGroup): FlagCopy {
+export function describe(g: CopyGroup, where = 'on this video'): FlagCopy {
   const n = g.ids.length;
   const acc = g.authors === 1 ? '1 account' : `${g.authors} accounts`;
   if (g.kind === 'campaign' && g.label) {
     return {
       title: 'Shared name',
       pill: { lead: `${g.label} in `, count: String(n), tail: ' comments' },
-      detail: `${g.label} is named in ${n} comments on this video, from ${acc}.`,
+      detail: `${g.label} is named in ${n} comments ${where}, from ${acc}.`,
     };
   }
   return {
@@ -32,20 +43,9 @@ export function describe(g: CopyGroup): FlagCopy {
     pill: { lead: 'Repeated ', count: String(n), tail: ' times' },
     detail:
       g.kind === 'exact'
-        ? `The same comment appears ${n} times on this video, from ${acc}.`
-        : `Nearly the same wording appears ${n} times on this video, from ${acc}.`,
+        ? `The same comment appears ${n} times ${where}, from ${acc}.`
+        : `Nearly the same wording appears ${n} times ${where}, from ${acc}.`,
   };
-}
-
-/** Comment id from the timestamp link (`&lc=<id>`); replies are "<parentId>.<replyId>". */
-function commentIdOf(node: Element): string | null {
-  const a = node.querySelector<HTMLAnchorElement>('#published-time-text a');
-  if (!a) return null;
-  try {
-    return new URL(a.href, location.origin).searchParams.get('lc');
-  } catch {
-    return null;
-  }
 }
 
 function createTip() {
@@ -91,10 +91,19 @@ export interface CommentFlags {
   destroy(): void;
 }
 
-export function createCommentFlags(minCount: number): CommentFlags {
+export function createCommentFlags(site: FlagSite, minCount: number): CommentFlags {
   const tip = createTip();
   let byId = new Map<string, CopyGroup>();
   const copyFor = new WeakMap<HTMLElement, FlagCopy>();
+
+  const fill = (host: HTMLElement, copy: FlagCopy) => {
+    copyFor.set(host, copy);
+    const pill = host.shadowRoot!.querySelector('.flag')!;
+    pill.textContent = '';
+    pill.append(h('span', { class: 'dot', 'aria-hidden': 'true' }), copy.pill.lead, h('b', {}, copy.pill.count), copy.pill.tail);
+    pill.setAttribute('aria-label', `${copy.title}. ${copy.detail}`);
+    host.dataset.key = copy.detail;
+  };
 
   const makeHost = (copy: FlagCopy): HTMLElement => {
     const sh = createShadowHost(COMMENT_FLAG_CSS, 'display:inline-block;vertical-align:middle;margin-left:8px;');
@@ -110,28 +119,18 @@ export function createCommentFlags(minCount: number): CommentFlags {
     return sh.host;
   };
 
-  const fill = (host: HTMLElement, copy: FlagCopy) => {
-    copyFor.set(host, copy);
-    const pill = host.shadowRoot!.querySelector('.flag')!;
-    pill.textContent = '';
-    pill.append(h('span', { class: 'dot', 'aria-hidden': 'true' }), copy.pill.lead, h('b', {}, copy.pill.count), copy.pill.tail);
-    pill.setAttribute('aria-label', `${copy.title}. ${copy.detail}`);
-    host.dataset.key = copy.detail;
-  };
-
   const applyAll = () => {
-    for (const node of document.querySelectorAll(COMMENT_SEL)) {
-      const header = node.querySelector('#header-author');
+    for (const node of site.nodes()) {
+      const header = site.headerOf(node);
       if (!header) continue;
-      // Only this comment's own header: replies are nested inside top-level comment elements.
       const existing = header.querySelector<HTMLElement>(`:scope > [${HOST_ATTR}]`);
-      const id = commentIdOf(node);
+      const id = site.idOf(node);
       const g = id ? byId.get(id) : undefined;
       if (!g || g.ids.length < minCount) {
         existing?.remove();
         continue;
       }
-      const copy = describe(g);
+      const copy = describe(g, site.where);
       if (existing) {
         if (existing.dataset.key !== copy.detail) fill(existing, copy);
       } else header.appendChild(makeHost(copy));

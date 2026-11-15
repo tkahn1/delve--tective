@@ -99,10 +99,19 @@ Offscreen doc: `src/engine/offscreen.html`, reasons ['WORKERS'].
 ## UI in pages
 Everything injected lives in Shadow DOM roots. Fonts in shadow DOM: register via `new FontFace('UnslopInter', 'url(chrome-extension://.../x.woff2)')` + document.fonts.add (font files in web_accessible_resources).
 
-## YouTube comment copies (checks/commentCopies/, content/youtube/, background/commentCopies.ts, ui/commentFlag.ts)
-Flags each YouTube comment or reply that is repeated elsewhere on the same video, with how many times it appears
-("Repeated 15 times", or "AMS39K in 5 comments" for a shared promoted name). Covers the whole video, not just loaded comments.
+## Comment copies (checks/commentCopies/, content/copies/, content/youtube/, content/reddit/, background/commentCopies.ts, ui/commentFlag.ts)
+Flags each comment or reply that is repeated elsewhere on the same YouTube video or Reddit thread, with how many times it
+appears ("Repeated 15 times", or "AMS39K in 5 comments" for a shared promoted name). Covers the whole page, not just loaded comments.
 Separate from `combine`, the page/search reports and stats: nothing recorded, in memory per tab only.
+`content/copies/controller.ts` is site-agnostic; a `CopiesSite` (youtube/site.ts, reddit/site.ts) gives page id, fetching
+and flag placement (`FlagSite`). To add a site, write one and pick it in `content/index.ts`.
+- **Reddit** (`config.commentCopies.reddit`; TODO(hack): not yet checked on live Reddit): Reddit's own JSON from the page's
+  origin, no key: `/comments/<id>.json` (tree, ~500), `/api/morechildren.json` (100 placeholders per call),
+  `/comments/<id>/_/<commentId>.json` ("continue this thread"). 2 requests at once, waits out `x-ratelimit-reset` on 429.
+  Ids are fullnames (`t1_abc`), matched to `shreddit-comment[thingid]` (pill in `[slot="commentMeta"]`) or old Reddit's
+  `.thing.comment[data-fullname]` (pill in `.tagline`). `[deleted]`/`[removed]` bodies are skipped.
+
+YouTube details:
 - **Loading:** content script, YouTube watch pages only, follows in-app navigation (`yt-navigate-finish` + URL poll).
   1. If the user saved a YouTube Data API key (options page, `chrome.storage.local` `ytApiKey`; not part of `Settings`,
      never broadcast), the SW fetches through `googleapis.com/youtube/v3` (100 per page; `host_permissions`).
