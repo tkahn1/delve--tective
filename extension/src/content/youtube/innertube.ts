@@ -7,6 +7,9 @@ import type { FetchStats } from '../../checks/commentCopies/messages';
 import type { VideoComment } from '../../checks/commentCopies/types';
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+/** Once throttled: at most one request this often, and only this many reply threads at once. */
+const SLOW_GAP_MS = 300;
+const SLOW_WORKERS = 2;
 
 /** Client info parsed from the page's own config script (the content script can't read page variables). */
 function clientContext(): Record<string, unknown> {
@@ -118,6 +121,7 @@ export async function fetchAllComments(videoId: string, o: InnertubeOptions): Pr
     for (let attempt = 0; ; attempt++) {
       const wait = coolUntil - Date.now();
       if (wait > 0) await sleep(wait);
+      await pace();
       let res: Response | null = null;
       if (o.stats) o.stats.requests++;
       try {
@@ -132,13 +136,25 @@ export async function fetchAllComments(videoId: string, o: InnertubeOptions): Pr
       } catch {
         /* network error: retry below */
       }
-      const retryable = !res || res.status === 429 || res.status >= 500;
+      // 403 / 429 mean YouTube is throttling us (seen after many scans in a row): slow down for the rest of the
+      // scan (fewer requests at once, a gap between them) and retry after 2 s, 4 s, 8 s, 16 s.
+      const throttled = !!res && (res.status === 403 || res.status === 429);
+      const retryable = !res || throttled || res.status >= 500;
       const why = res ? `HTTP ${res.status}` : 'network error';
       if (o.stats) o.stats.lastError = why;
       if (!retryable || attempt >= 4) throw new Error(why);
       if (o.stats) o.stats.retries++;
-      coolUntil = Math.max(coolUntil, Date.now() + 500 * 2 ** attempt);
+      if (throttled) slow = true;
+      coolUntil = Math.max(coolUntil, Date.now() + (throttled ? 2000 : 500) * 2 ** attempt);
     }
+  };
+  let slow = false; // set once YouTube throttles; see above
+  let nextAt = 0;
+  const pace = async () => {
+    if (!slow) return;
+    const now = Date.now();
+    nextAt = Math.max(now, nextAt + SLOW_GAP_MS);
+    if (nextAt > now) await sleep(nextAt - now);
   };
 
   const replyQueue: string[] = [];
@@ -175,8 +191,9 @@ export async function fetchAllComments(videoId: string, o: InnertubeOptions): Pr
     }
   };
 
-  const replyWorker = async () => {
+  const replyWorker = async (worker: number) => {
     while (o.isLive() && replyCount < o.maxReplies) {
+      if (slow && worker >= SLOW_WORKERS) return; // throttled: fewer at once
       if (qi >= replyQueue.length) {
         if (topDone) return;
         await sleep(100);
@@ -195,7 +212,7 @@ export async function fetchAllComments(videoId: string, o: InnertubeOptions): Pr
     }
   };
 
-  const results = await Promise.allSettled([topLevel(), ...Array.from({ length: o.replyWorkers }, replyWorker)]);
+  const results = await Promise.allSettled([topLevel(), ...Array.from({ length: o.replyWorkers }, (_, i) => replyWorker(i))]);
   const failed = results.find((r): r is PromiseRejectedResult => r.status === 'rejected');
   if (failed) throw failed.reason instanceof Error ? failed.reason : new Error(String(failed.reason));
 }
