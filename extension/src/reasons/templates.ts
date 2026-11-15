@@ -14,7 +14,12 @@ export const TEMPLATES: Record<TemplateId, string> = {
 export function fillReason(ref: ReasonRef): string {
   const template = TEMPLATES[ref.templateId];
   if (!template) return '';
-  return template.replace(/\{(\w+)\}/g, (match, key: string) => {
+  // "{n} other sites" -> "1 other site" when n === 1 (also "results", "paragraphs").
+  const plural = template.replace(/\{(\w+)\}( of \{\w+\})?( other)? (sites|results|paragraphs)\b/g, (m, key: string, of, other, noun: string) => {
+    const countKey = of ? of.slice(5, -1) : key;
+    return ref.values?.[countKey] === 1 ? m.slice(0, -1) : m;
+  });
+  return plural.replace(/\{(\w+)\}/g, (match, key: string) => {
     const v = ref.values?.[key];
     return v === undefined || v === null ? match : String(v);
   });

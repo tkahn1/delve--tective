@@ -40,10 +40,42 @@ function realUrl(a: HTMLAnchorElement): string | null {
       return null;
     }
   }
+  // Opaque redirect wrapper: /goto?url=<token> (live Google 2026-11). Target unknown; caller uses <cite>.
+  // Checked by path, not host, so saved copies (served from localhost) behave like the live page.
+  if (u.pathname === '/goto') return null;
   if (u.protocol !== 'http:' && u.protocol !== 'https:') return null;
   if (/(^|\.)google\.[a-z.]+$/i.test(u.hostname) || u.hostname.endsWith('googleusercontent.com')) return null;
   href = u.href;
   return href;
+}
+
+/**
+ * Live Google (seen 2026-11-14) wraps result links as /goto?url=<opaque token>, so the target is
+ * not in the href. Fall back to the displayed URL in <cite>: "https://site.com › path › more".
+ */
+function urlFromCite(container: HTMLElement): string | null {
+  for (const c of Array.from(container.querySelectorAll('cite'))) {
+    const parts = (c.textContent ?? '').split('›').map((s) => s.trim()).filter(Boolean);
+    if (!parts.length) continue;
+    // First token only: video results read "YouTube · Mr. Coffee", which must not become a host.
+    let base = parts[0].split(/\s+/)[0];
+    if (!/^https?:\/\//i.test(base)) base = `https://${base}`;
+    try {
+      const u = new URL(base);
+      if (!/^[a-z0-9-]+(\.[a-z0-9-]+)*\.[a-z]{2,}$/i.test(u.hostname) && !/\.xn--[a-z0-9-]+$/i.test(u.hostname)) continue;
+      if (/(^|\.)google\.[a-z.]+$/i.test(u.hostname)) continue;
+      // Drop truncated segments ("best-coffee…", "best-coffee...") and everything after them.
+      const path: string[] = [];
+      for (const p of parts.slice(1)) {
+        if (/(\.\.\.|…)$/.test(p) || /^(\.\.\.|…)/.test(p)) break;
+        path.push(p);
+      }
+      return path.length ? `${u.origin}/${path.map(encodeURIComponent).join('/')}` : u.origin + '/';
+    } catch {
+      continue;
+    }
+  }
+  return null;
 }
 
 function containerFor(a: HTMLAnchorElement, root: Element): HTMLElement {
@@ -87,9 +119,9 @@ export function findResults(doc: Document = document): ResultEl[] {
     if (a.closest(SKIP)) continue;
     const h3 = a.querySelector('h3');
     if (!h3) continue;
-    const url = realUrl(a);
-    if (!url) continue;
     const container = containerFor(a, root);
+    const url = realUrl(a) ?? urlFromCite(container);
+    if (!url) continue;
     // Sub-links (sitelinks) share their parent's container; first anchor wins.
     if (containers.has(container) || urls.has(url)) continue;
     const title = (h3.textContent ?? '').replace(/\s+/g, ' ').trim();

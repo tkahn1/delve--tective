@@ -43,7 +43,9 @@ function unslopAssets(): Plugin {
     const ortDist = findOrtDist();
     if (ortDist) {
       for (const f of readdirSync(ortDist)) {
-        if (/^ort-wasm.*\.(wasm|mjs)$/.test(f)) copyIfNewer(join(ortDist, f), join(publicDir, 'ort', f));
+        // Only the asyncify variant is loaded (WASM backend; jsep = WebGPU, jspi and plain are unused).
+        // Checked 2026-11-14: model loads and outlines render with only these files. Saves ~60 MB.
+        if (/^ort-wasm-simd-threaded\.asyncify\.(wasm|mjs)$/.test(f)) copyIfNewer(join(ortDist, f), join(publicDir, 'ort', f));
       }
     } else {
       console.warn('[unslop-assets] onnxruntime-web dist not found; ort/ not copied');

@@ -59,10 +59,13 @@ export const config: DetectorsConfig = {
     minWords: 50,
     chunkMin: 80,
     chunkMax: 250,
-    maxChunks: 6,
+    // TODO(hack): tuned on the live mayfairfarms/peggyomara pages (2026-11-14). At 0.3 layer A
+    // passed only ~8% of real chunks and missed most model-flagged ones, so it now only ranks
+    // chunks (threshold 0) and the top 12 go to layer B (~350 ms each on WASM, ~4 s total).
+    maxChunks: 12,
     maxTokens: 256,
     minFlaggedChunks: 2,
-    layerA: { passThreshold: 0.3 },
+    layerA: { passThreshold: 0 },
     layerB: {
       enabled: true,
       threshold: 0.9,
@@ -79,6 +82,8 @@ export const config: DetectorsConfig = {
     'mayfairfarms.html': 'https://www.mayfairfarms.com/?p=73153',
     'peggyomara.html': 'https://www.peggyomara.com/best-coffee-grinders/',
     'google-air-fryer.html': 'https://www.google.com/search?q=best+air+fryer+2026',
+    // Test fixture (extension/tests/fixtures/): live Google result blocks, /goto links.
+    'google-live-2026-11-14.html': 'https://www.google.com/search?q=best+coffee+grinder+2026',
   },
 };
 

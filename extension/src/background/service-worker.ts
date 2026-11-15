@@ -314,11 +314,16 @@ let reqCounter = 0;
 
 function buildVerdict(input: PageInput, evidence: Evidence[], done: boolean): PageVerdict {
   const c = combine(evidence);
-  const spans: SpanFlag[] = evidence.flatMap((e) => e.spans ?? []).sort((a, b) => a.chunkIndex - b.chunkIndex);
+  // Outlines (and text-check reasons) only when the whole page is Medium or High (Toby, 2026-11-14):
+  // plain human text such as Wikipedia articles got paragraphs outlined at level Low.
+  const showText = c.level === 'medium' || c.level === 'high';
+  const spans: SpanFlag[] = showText
+    ? evidence.flatMap((e) => e.spans ?? []).sort((a, b) => a.chunkIndex - b.chunkIndex)
+    : [];
   return {
     level: c.level,
     segments: c.segments,
-    reasons: c.reasons,
+    reasons: showText ? c.reasons : c.reasons.filter((r) => !r.templateId.startsWith('text.')),
     spans,
     chunkCount: input.chunks?.length ?? 0,
     done,

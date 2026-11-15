@@ -16,12 +16,16 @@ function sentence(r: ReasonRef): string {
 }
 
 /** "On the shared junk-site list. 2 of 4 paragraphs outlined." */
-export function badgeSummary(v: PageVerdict): string {
+// Spans index chunks, and a chunk is several merged <p>/<li> blocks, each outlined separately.
+// Count the outlined page elements (what the reader sees), not chunks.
+export function badgeSummary(v: PageVerdict, chunkEls?: HTMLElement[][]): string {
   const parts: string[] = [];
   const lead = v.reasons.find((r) => !isTextReason(r)) ?? (v.spans.length ? null : v.reasons[0]);
   if (lead) parts.push(sentence(lead));
-  if (v.spans.length && v.chunkCount) {
-    parts.push(`${v.spans.length} of ${v.chunkCount} paragraph${v.chunkCount === 1 ? '' : 's'} outlined.`);
+  const outlined = chunkEls ? v.spans.reduce((n, s) => n + (chunkEls[s.chunkIndex]?.length ?? 0), 0) : v.spans.length;
+  const total = chunkEls ? chunkEls.reduce((n, els) => n + els.length, 0) : v.chunkCount;
+  if (outlined && total) {
+    parts.push(`${outlined} of ${total} paragraph${total === 1 ? '' : 's'} outlined.`);
   }
   return parts.join(' ');
 }
@@ -98,7 +102,7 @@ export function startPage(url: string, domain: string, _initial: Settings): Cont
           },
         });
       }
-      badge.update({ level: v.level, segments: v.segments, summary: badgeSummary(v), settingUp: v.settingUp && !v.done });
+      badge.update({ level: v.level, segments: v.segments, summary: badgeSummary(v, extracted.chunkEls), settingUp: v.settingUp && !v.done });
     } else {
       badge?.update(null);
     }

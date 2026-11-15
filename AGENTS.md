@@ -57,6 +57,17 @@ demo/pages/           # saved/mock demo pages (see demo/README.md)
 eval/                 # test sets (gitignored) + RESULTS.md
 ```
 
+## Known gotchas (updated 2026-11-14)
+
+- **Model download:** the source repo (`Lynote/...-browser`) only ships `onnx/model.onnx` (fp32, ~500 MB), so `fetch_model.py` does not get the 8-bit file the extension loads. Download `onnx/model.onnx` and quantize it with `onnxruntime.quantization.quantize_dynamic(..., weight_type=QuantType.QInt8)` to `extension/public/models/fakespot-roberta/onnx/model_quantized.onnx` (~125 MB). Outputs match fp32 closely on spot checks. TODO(hack): fold this into `fetch_model.py`.
+- **Reload after every build:** each `npm run build` renames the content-script files. Click the reload arrow on Unslop in `chrome://extensions` (and reload open tabs), or the extension silently does nothing.
+- **Live Google wraps result links** as `/goto?url=<opaque token>`; the real site is read from `<cite>` (`content/engines/google.ts`). Fixture: `extension/tests/fixtures/google-live-2026-11-14.html`. Automated/headless browsers get a captcha on Google; test with a saved copy or a real browser.
+- **Outlines only show at level Medium/High** (`buildVerdict` in `background/service-worker.ts`). The text model alone outlined plain Wikipedia text, so text evidence is hidden on Low pages.
+- **Allowlisted sites are never checked** (`src/data/allowlist.json`, 77 domains incl. Wikipedia, Reddit, NYT, BBC).
+- **Site list matches by registrable domain**, so shared hosts (`*.pages.dev`) or a company subdomain can't be listed without dimming the whole parent domain.
+- **Demo pages:** `demo/pages/mayfairfarms.html` and `peggyomara.html` are real saved copies (2026-11-14). The two articles are not copies of each other (MinHash similarity 0.00). The Google pages in `demo/pages/` are still mocks.
+- **Only ~350 ms per chunk on WASM**; 12 chunks per page (~4 s). WebGPU measured slower. Build ships only the `asyncify` onnxruntime variant.
+
 ## Working style
 
 - **Keep changes small and focused.** Four people (plus their agents) are editing at the same time. Touch only the files the task needs. Don't reformat, rename, or reorganize code you weren't asked to change.
