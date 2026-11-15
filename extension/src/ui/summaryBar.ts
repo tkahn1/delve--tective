@@ -37,7 +37,7 @@ export function createSummaryBar(onFlip: (next: Mode) => void): SummaryBar {
   };
 }
 
-/** "• Worth a second look: a · b   Show anyway" */
+/** "• Flagged: a · b   Show anyway" */
 export function createReasonLine(reasons: string[], onShow: () => void): ShadowHost {
   const sh = createShadowHost(SEARCH_CSS);
   const show = h('button', { class: 'show', type: 'button' }, 'Show anyway');

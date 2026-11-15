@@ -46,7 +46,7 @@ export function createCopiesSummary(where: string, placement: () => SummaryPlace
     h('div', { class: 'body', id: 'copies-body' },
       h('div', { class: 'inner' },
         list,
-        h('p', { class: 'fine' }, 'Each repeated comment is marked below. Worth a second look. Checks can be wrong.'))),
+        h('p', { class: 'fine' }, 'Each repeated comment is flagged below. Checks can be wrong.'))),
   );
   sh.root.appendChild(card);
 

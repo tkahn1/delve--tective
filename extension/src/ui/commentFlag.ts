@@ -32,7 +32,7 @@ export interface FlagCopy {
   detail: string;
 }
 
-/** Wording: describes what was seen, never intent ("worth a second look", not "fake" or "bot"). */
+/** Wording: describes what was seen, never intent ("flagged", not "fake" or "bot"). */
 export function describe(g: CopyGroup, where = 'on this video'): FlagCopy {
   const n = g.ids.length;
   const acc = g.authors === 1 ? '1 account' : `${g.authors} accounts`;
@@ -61,7 +61,7 @@ function createTip() {
   const title = h('p', { class: 't' });
   const detail = h('p', { class: 'r' });
   const tip = h('div', { class: 'u tip', role: 'tooltip', hidden: '' }, title, detail,
-    h('p', { class: 'fine' }, 'Worth a second look. Checks can be wrong.'));
+    h('p', { class: 'fine' }, 'Flagged. Checks can be wrong.'));
   sh.root.appendChild(tip);
   document.documentElement.appendChild(sh.host);
   let timer = 0;
