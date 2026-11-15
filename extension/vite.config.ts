@@ -85,6 +85,13 @@ export default defineConfig({
         options: resolve(root, 'src/options/index.html'),
         bench: resolve(root, 'bench/bench.html'),
       },
+      // Stable file names (no content hashes): a rebuild then can't leave the loaded extension pointing at
+      // deleted files, which silently stopped the content script until the extension was reloaded.
+      output: {
+        entryFileNames: 'assets/[name].js',
+        chunkFileNames: 'assets/[name].js',
+        assetFileNames: 'assets/[name][extname]',
+      },
     },
   },
   server: {
