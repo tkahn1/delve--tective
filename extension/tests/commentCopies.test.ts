@@ -16,6 +16,10 @@ describe('campaignTokens', () => {
   it('finds promoted names and folds a trailing s', () => {
     expect([...campaignTokens('Watching AMS39Ks price, buy $PEPE now')].sort()).toEqual(['$pepe', 'ams39k']);
   });
+  it('ignores @mentions and links (replies start with @handle)', () => {
+    expect(campaignTokens('@sethh1943 agreed, see https://x.co/ab12cd34').size).toBe(0);
+    expect([...campaignTokens('@sethh1943 buy AMS39K')]).toEqual(['ams39k']);
+  });
   it('skips ordinals, decades, sizes and years', () => {
     expect(campaignTokens('the 1st time in the 90s, 10k views, 1080p, 2026').size).toBe(0);
   });
@@ -57,6 +61,15 @@ describe('groupComments', () => {
     const g = groupComments(list);
     expect(g).toHaveLength(1);
     expect(g[0]).toMatchObject({ kind: 'campaign', label: 'AMS39K', authors: 3 });
+  });
+
+  it('replies to the same person do not form a campaign', () => {
+    const list = [
+      c('@a', '@sethh1943 Mizzy will end up pranking the wrong person', true),
+      c('@b', '@sethh1943 honestly he deserved that interview', true),
+      c('@c', '@sethh1943 Piers handled it really well I think', true),
+    ];
+    expect(groupComments(list)).toHaveLength(0);
   });
 
   it('needs 3 different accounts for a campaign', () => {

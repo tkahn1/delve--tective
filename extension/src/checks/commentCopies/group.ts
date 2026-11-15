@@ -23,7 +23,10 @@ export function normalize(text: string): string {
 export function campaignTokens(raw: string): Set<string> {
   const out = new Set<string>();
   const re = /\$[A-Za-z]{2,10}\b|\b(?=[A-Za-z0-9]*\d)(?=[A-Za-z0-9]*[A-Za-z])[A-Za-z0-9]{4,12}\b/g;
-  for (const m of (raw || '').matchAll(re)) {
+  // Replies start with "@handle" of the person replied to: a handle with digits (@sethh1943) is not a promoted
+  // name, and counting it chained every reply under a popular comment into one "campaign". Links neither.
+  const text = (raw || '').replace(/https?:\/\/\S+/g, ' ').replace(/(^|\s)@[\w.\-]+/g, ' ');
+  for (const m of text.matchAll(re)) {
     let t = m[0].toLowerCase();
     if (t.length > 4 && t.endsWith('s') && /\d/.test(t.slice(0, -1))) t = t.slice(0, -1); // AMS39Ks -> ams39k
     if (/^\d+(st|nd|rd|th|s|k|m|am|pm|p|fps)$/.test(t)) continue; // 1st, 90s, 10k, 1080p

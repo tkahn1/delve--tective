@@ -46,7 +46,7 @@ export interface CopiesStatus {
 export type CopiesRequest =
   | { type: 'copies/reset'; run: number }
   | { type: 'copies/add'; run: number; comments: VideoComment[] }
-  | { type: 'copies/group'; run: number; final: boolean; nearThreshold?: number }
+  | { type: 'copies/group'; run: number; final: boolean; nearThreshold?: number; nearMinWords?: number }
   | { type: 'copies/apiScan'; run: number; videoId: string }
   | { type: 'copies/status'; status: CopiesStatus | null };
 

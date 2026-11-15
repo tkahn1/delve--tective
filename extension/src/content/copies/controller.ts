@@ -55,13 +55,15 @@ const STATUS_EVERY_MS = 1000;
  * The popup's Sensitivity applies to comments too:
  *  relaxed:  only exact copies and shared names, repeated 3+ times;
  *  balanced: every group of 2+;
- *  strict:   every group of 2+, with looser near-copy matching (shared words >= 50% instead of 60%).
+ *  strict:   every group of 2+, with looser near-copy matching (shared words >= 50% instead of 60%, and
+ *            comments with 4+ meaningful words instead of 5).
  */
 export function keepGroup(g: CopyGroup, sensitivity: Settings['sensitivity']): boolean {
   if (sensitivity === 'relaxed') return g.kind !== 'near' && g.ids.length >= 3;
   return g.ids.length >= config.commentCopies.minFlagCount;
 }
-const nearThresholdFor = (s: Settings['sensitivity']) => (s === 'strict' ? 0.5 : undefined);
+const nearOptsFor = (s: Settings['sensitivity']) =>
+  s === 'strict' ? { nearThreshold: 0.5, nearMinWords: 4 } : { nearThreshold: undefined, nearMinWords: undefined };
 
 export function startCommentCopies(site: CopiesSite, initial: Settings): Controller {
   const cfg = config.commentCopies;
@@ -206,16 +208,16 @@ export function startCommentCopies(site: CopiesSite, initial: Settings): Control
       send({ type: 'copies/add', run: s.run, comments: s.comments.slice(s.sent) });
       s.sent = s.comments.length;
     }
-    const nearThreshold = nearThresholdFor(settings.sensitivity);
+    const near = nearOptsFor(settings.sensitivity);
     if (final) {
-      send({ type: 'copies/group', run: s.run, final: true, nearThreshold });
+      send({ type: 'copies/group', run: s.run, final: true, ...near });
       return;
     }
     const now = Date.now();
     if (busy || now - lastGroup < cfg.liveRegroupMs) return;
     lastGroup = now;
     busy = true;
-    send({ type: 'copies/group', run: s.run, final: false, nearThreshold });
+    send({ type: 'copies/group', run: s.run, final: false, ...near });
   }
 
   async function start(id: string) {

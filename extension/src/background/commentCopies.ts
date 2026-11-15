@@ -177,7 +177,7 @@ export function registerCommentCopies(opts: { onStatus?(tabId: number, status: C
           const groups = groupComments(ctx.comments, {
             minChars: cfg.minChars,
             nearThreshold: msg.nearThreshold ?? cfg.nearThreshold,
-            nearMinWords: cfg.nearMinWords,
+            nearMinWords: msg.nearMinWords ?? cfg.nearMinWords,
             campaignMin: cfg.campaignMin,
             // Quick capped passes while the scan runs, one full pass at the end.
             maxDf: msg.final ? undefined : cfg.liveMaxDf,
