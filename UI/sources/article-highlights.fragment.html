@@ -1,0 +1,110 @@
+<div id="unslop-article-demo">
+ <div class="ua-context"><span>Article preview</span><span>Illustrative findings</span></div>
+ <section class="ua-window" aria-label="Article with Unslop annotations">
+  <header class="ua-address"><span>brewguide.example / guides / coffee-grinders</span><button type="button" class="ua-eye cursor-interaction" data-reason="overview" aria-label="Show Unslop page findings" aria-expanded="false"><i data-lucide="eye" aria-hidden="true"></i><span>3 signals</span></button></header>
+  <div class="ua-content">
+   <div class="ua-publisher">Field Notes <span>Kitchen &amp; home</span></div>
+   <article>
+    <h1>Finding a coffee grinder<br class="ua-break"> you’ll actually keep</h1>
+    <div class="ua-byline">By Sam Ellis · October 24, 2026 · 4 min read</div>
+    <p class="ua-intro">A good grinder should make breakfast easier. Before comparing features, think about how you brew and how much space you have.</p>
+    <p><button type="button" class="ua-highlight ua-phrase cursor-interaction" data-reason="opening" aria-haspopup="dialog" aria-controls="ua-explanation" aria-expanded="false">In today’s fast-paced world</button>, finding the perfect coffee grinder can be a <button type="button" class="ua-highlight ua-phrase cursor-interaction" data-reason="phrase" aria-haspopup="dialog" aria-controls="ua-explanation" aria-expanded="false">game-changer</button> for your morning routine. Whether you’re a beginner or a seasoned enthusiast, there’s an option for everyone.</p>
+    <div class="ua-paragraph-note"><button type="button" class="ua-quiet cursor-interaction" data-reason="model" aria-haspopup="dialog" aria-controls="ua-explanation" aria-expanded="false"><i data-lucide="info" aria-hidden="true"></i>Text check flagged this paragraph</button></div>
+    <h2>Start with the burrs</h2>
+    <p>Most buyers will get more from consistent grinding than from an app. <button type="button" class="ua-highlight ua-copy cursor-interaction" data-reason="copy" aria-haspopup="dialog" aria-controls="ua-explanation" aria-expanded="false">The stainless-steel burrs deliver a consistent grind, while the compact design fits neatly on any countertop.</button></p>
+    <p>There are tradeoffs. A smaller hopper needs filling more often, and a quiet motor may come with a higher price. Check the availability of replacement parts before committing.</p>
+    <div class="ua-footer"><i data-lucide="eye" aria-hidden="true"></i><span>Unslop highlights are clues, not verdicts.</span><button type="button" class="ua-quiet cursor-interaction" id="ua-toggle">Hide highlights</button></div>
+   </article>
+  </div>
+  <section id="ua-explanation" class="ua-explanation" role="dialog" aria-labelledby="ua-reason-title" hidden>
+   <div class="ua-pophead"><span class="ua-popbrand"><i data-lucide="eye" aria-hidden="true"></i>Unslop</span><button type="button" id="ua-close" class="ua-close cursor-interaction" aria-label="Close explanation"><i data-lucide="x" aria-hidden="true"></i></button></div>
+   <div id="ua-reason-content" aria-live="polite"></div>
+  </section>
+ </section>
+</div>
+<style>
+#unslop-article-demo {color-scheme:light dark;--ua-paper:light-dark(#ffffff,#1c1d1f);--ua-ink:light-dark(#25282b,#ededeb);--ua-muted:light-dark(#666b70,#b1b5b9);--ua-rule:light-dark(#e2e4e7,#414448);--ua-soft:light-dark(#f7f8f9,#26292d);--ua-accent:light-dark(#9c4c0c,#f0b36c);--ua-highlight:light-dark(#fff0cf,#554126);--ua-copy:light-dark(#fef6e7,#3c3428);--ua-percent:85%;font-family:Arial,Helvetica,sans-serif;color:var(--ua-ink);}
+#unslop-article-demo * {box-sizing:border-box;}
+#unslop-article-demo [hidden] {display:none!important;}
+#unslop-article-demo .ua-context {display:flex;justify-content:space-between;gap:12px;margin:0 0 12px;font:12px/1.4 Arial,sans-serif;color:var(--ua-muted);}
+#unslop-article-demo .ua-window {position:relative;background:var(--ua-paper);border:1px solid var(--ua-rule);border-radius:6px;overflow:clip;}
+#unslop-article-demo .ua-address {display:flex;justify-content:space-between;align-items:center;gap:12px;border-bottom:1px solid var(--ua-rule);padding:12px 20px;background:var(--ua-soft);font:12px/1.4 Arial,sans-serif;color:var(--ua-muted);}
+#unslop-article-demo .ua-address>span {min-width:0;overflow-wrap:anywhere;}
+#unslop-article-demo button {touch-action:manipulation;}
+#unslop-article-demo button:focus-visible {outline:2px solid var(--ua-accent);outline-offset:3px;}
+#unslop-article-demo .ua-eye {display:inline-flex;align-items:center;gap:7px;flex:none;border:1px solid var(--ua-rule);background:var(--ua-paper);color:var(--ua-ink);padding:5px 8px;border-radius:4px;font:12px/1.4 Arial,sans-serif;}
+#unslop-article-demo i,#unslop-article-demo svg {width:15px;height:15px;flex:none;}
+#unslop-article-demo .ua-content {max-width:700px;margin:auto;padding:32px 40px 28px;}
+#unslop-article-demo .ua-publisher {font:600 17px/1.4 Georgia,serif;display:flex;align-items:baseline;justify-content:space-between;gap:12px;border-bottom:1px solid var(--ua-rule);padding-bottom:13px;margin-bottom:25px;}
+#unslop-article-demo .ua-publisher span {font:12px/1.4 Arial,sans-serif;color:var(--ua-muted);}
+#unslop-article-demo h1 {font:500 34px/1.15 Georgia,'Times New Roman',serif;letter-spacing:-.6px;margin:0 0 13px;color:var(--ua-ink);}
+#unslop-article-demo .ua-byline {font:12px/1.5 Arial,sans-serif;color:var(--ua-muted);margin-bottom:24px;}
+#unslop-article-demo p {font:17px/1.75 Georgia,'Times New Roman',serif;margin:20px 0;color:var(--ua-ink);}
+#unslop-article-demo .ua-intro {color:var(--ua-muted);}
+#unslop-article-demo h2 {font:500 23px/1.3 Georgia,serif;margin:26px 0 12px;color:var(--ua-ink);}
+#unslop-article-demo .ua-highlight {font:inherit;line-height:inherit;color:inherit;border:0;text-align:inherit;display:inline;padding:0 2px;margin:0 -2px;border-radius:2px;white-space:normal;background:color-mix(in srgb,var(--ua-highlight) var(--ua-percent),transparent);box-decoration-break:clone;-webkit-box-decoration-break:clone;text-decoration:underline;text-decoration-color:var(--ua-accent);text-decoration-style:dotted;text-underline-offset:4px;text-decoration-thickness:1px;}
+#unslop-article-demo .ua-copy {background:var(--ua-copy);text-decoration-style:solid;}
+#unslop-article-demo .ua-highlight:hover,#unslop-article-demo .ua-highlight[aria-expanded=true] {background:var(--ua-highlight);text-decoration-style:solid;}
+#unslop-article-demo .ua-paragraph-note {margin-top:-9px;}
+#unslop-article-demo .ua-quiet {display:inline-flex;align-items:center;gap:6px;background:none;border:0;color:var(--ua-muted);padding:4px 0;font:12px/1.5 Arial,sans-serif;text-decoration:underline;text-underline-offset:3px;}
+#unslop-article-demo .ua-quiet:hover {color:var(--ua-ink);}
+#unslop-article-demo .ua-footer {display:flex;align-items:center;gap:8px;flex-wrap:wrap;border-top:1px solid var(--ua-rule);padding-top:16px;margin-top:28px;font:12px/1.4 Arial,sans-serif;color:var(--ua-muted);}
+#unslop-article-demo .ua-footer .ua-quiet {margin-left:auto;}
+#unslop-article-demo .ua-explanation {position:absolute;z-index:3;width:330px;max-width:calc(100% - 24px);background:var(--ua-paper);border:1px solid var(--ua-rule);box-shadow:0 6px 24px light-dark(#00000018,#00000066);border-radius:6px;padding:13px 15px;color:var(--ua-ink);font:13px/1.5 Arial,sans-serif;}
+#unslop-article-demo .ua-pophead {display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;color:var(--ua-muted);}
+#unslop-article-demo .ua-popbrand {display:inline-flex;align-items:center;gap:6px;font:12px/1.4 Arial,sans-serif;}
+#unslop-article-demo .ua-close {display:flex;align-items:center;justify-content:center;border:0;background:none;color:var(--ua-muted);padding:4px;}
+#unslop-article-demo .ua-explanation h3 {font:600 15px/1.35 Arial,sans-serif;margin:0 0 7px;color:var(--ua-ink);}
+#unslop-article-demo .ua-explanation p {font:13px/1.55 Arial,sans-serif;margin:8px 0;}
+#unslop-article-demo .ua-explanation blockquote {font:14px/1.6 Georgia,serif;background:var(--ua-soft);padding:9px 11px;margin:10px 0;border:0;border-radius:3px;color:var(--ua-ink);}
+#unslop-article-demo .ua-explanation .ua-caveat {font-size:12px;color:var(--ua-muted);border-top:1px solid var(--ua-rule);padding-top:9px;margin-top:11px;}
+#unslop-article-demo .ua-explanation .ua-type {font:12px/1.4 Arial,sans-serif;color:var(--ua-accent);margin-bottom:6px;}
+#unslop-article-demo .ua-source {display:flex;justify-content:space-between;gap:10px;border-top:1px solid var(--ua-rule);padding:7px 0;font:12px/1.5 Arial,sans-serif;overflow-wrap:anywhere;}
+#unslop-article-demo .ua-source span:last-child {color:var(--ua-muted);flex:none;}
+#unslop-article-demo .ua-dismiss {background:var(--ua-ink);color:var(--ua-paper);border:0;padding:7px 10px;border-radius:4px;font:12px/1.4 Arial,sans-serif;margin-top:8px;}
+#unslop-article-demo .ua-unmarked .ua-highlight {background:none;text-decoration:none;}
+#unslop-article-demo .ua-underline .ua-highlight {background:none;text-decoration-thickness:2px;}
+@media(max-width:520px){#unslop-article-demo .ua-content{padding:24px 22px;}#unslop-article-demo h1{font-size:29px;}#unslop-article-demo p{font-size:16px;}#unslop-article-demo .ua-break{display:none;}#unslop-article-demo .ua-address{padding:10px 12px;}#unslop-article-demo .ua-publisher span{font-size:11px;}}
+@media(pointer:coarse){#unslop-article-demo .ua-eye,#unslop-article-demo .ua-close,#unslop-article-demo .ua-dismiss,#unslop-article-demo .ua-quiet{min-height:44px;} }
+</style>
+<script>
+(()=>{
+ const root=document.getElementById('unslop-article-demo');
+ const win=root.querySelector('.ua-window');
+ const panel=root.querySelector('#ua-explanation');
+ const content=root.querySelector('#ua-reason-content');
+ const close=root.querySelector('#ua-close');
+ const toggle=root.querySelector('#ua-toggle');
+ const prefs={style:'Highlighter',strength:85};
+ let selected=null,pinned=false,hoverTimer,suppressFocus=false;
+ const reasons={
+  opening:{title:'Common stock opening',type:'Phrase-list match · weak clue',body:'This wording matches an entry in Unslop’s stock-phrase list. It introduces the topic without adding a specific detail.',quote:'In today’s fast-paced world',caveat:'People use this phrase too. This match cannot tell us who wrote the article.'},
+  phrase:{title:'Generic promotional wording',type:'Phrase-list match · weak clue',body:'“Game-changer” matches the phrase list. Here, it praises the product without explaining what specifically improved.',quote:'game-changer',caveat:'This is a writing-pattern clue, not proof of AI authorship or poor quality.'},
+  copy:{title:'Matching text found elsewhere',type:'Text-match evidence',body:'In this example, this exact sentence also appears in two other indexed articles.',quote:'The stainless-steel burrs deliver a consistent grind, while the compact design fits neatly on any countertop.',sources:true,caveat:'Repeated text may be syndicated, quoted, or supplied by a manufacturer. The match does not establish which site wrote it first.'},
+  model:{title:'The paragraph resembles AI-written examples',type:'Local text-classifier signal',body:'The model flagged the paragraph as a whole. It does not identify which individual words caused that result.',caveat:'This is a sample model result. A score is not a verdict on truth, quality, or authorship. Formal and non-native writing can be misclassified.'},
+  overview:{title:'What Unslop noticed',type:'Page findings',body:'Two stock phrases, one matching passage, and a text-classifier signal. The two phrase matches are one type of evidence, not two independent detectors.',caveat:'All findings in this preview are illustrative. Click or focus a highlight to inspect its reason.'}
+ };
+ function save(){if(globalThis.openai?.setWidgetState)globalThis.openai.setWidgetState({modelContent:{articleHighlight:selected?.dataset.reason||null},privateContent:{highlightsHidden:win.classList.contains('ua-unmarked')}}).catch(()=>{});}
+ function place(){if(panel.hidden||!selected)return;const bounds=win.getBoundingClientRect(),anchor=selected.getBoundingClientRect(),width=panel.offsetWidth,height=panel.offsetHeight;let left=anchor.left-bounds.left;left=Math.min(Math.max(12,left),bounds.width-width-12);let top=anchor.bottom-bounds.top+9;if(top+height>bounds.height-12&&anchor.top-bounds.top-height-9>=10)top=anchor.top-bounds.top-height-9;panel.style.left=left+'px';panel.style.top=Math.max(10,top)+'px';}
+ function show(button,pin=false){clearTimeout(hoverTimer);if(selected&&selected!==button)selected.setAttribute('aria-expanded','false');selected=button;pinned=pin;const r=reasons[button.dataset.reason];content.innerHTML=`<div class="ua-type">${r.type}</div><h3 id="ua-reason-title">${r.title}</h3><p>${r.body}</p>${r.quote?`<blockquote>${r.quote}</blockquote>`:''}${r.sources?'<div class="ua-source"><span>grinder-guide.example</span><span>Match</span></div><div class="ua-source"><span>dailybrews.example</span><span>Match</span></div>':''}<p class="ua-caveat">${r.caveat}</p><button type="button" class="ua-dismiss cursor-interaction">Dismiss this highlight</button>`;panel.hidden=false;button.setAttribute('aria-expanded','true');place();}
+ function hide(restore=false){clearTimeout(hoverTimer);const previous=selected;panel.hidden=true;if(selected)selected.setAttribute('aria-expanded','false');selected=null;pinned=false;if(restore&&previous){suppressFocus=true;previous.focus();suppressFocus=false;}}
+ root.querySelectorAll('[data-reason]').forEach(button=>{
+  button.addEventListener('pointerenter',()=>{if(!pinned)show(button);});
+  button.addEventListener('pointerleave',()=>{hoverTimer=setTimeout(()=>{if(!pinned&&!panel.matches(':hover')&&!panel.contains(document.activeElement))hide();},160);});
+  button.addEventListener('focus',()=>{if(!pinned&&!suppressFocus)show(button);});
+  button.addEventListener('click',()=>{show(button,true);save();});
+ });
+ panel.addEventListener('pointerenter',()=>clearTimeout(hoverTimer));
+ panel.addEventListener('pointerleave',()=>{if(!pinned&&!panel.contains(document.activeElement))hide();});
+ close.addEventListener('click',()=>hide(true));
+ content.addEventListener('click',e=>{if(e.target.closest('.ua-dismiss')){if(selected&&selected.classList.contains('ua-highlight')){selected.style.background='none';selected.style.textDecoration='none';}hide(true);save();}});
+ root.addEventListener('keydown',e=>{if(e.key==='Escape'){e.preventDefault();hide(true);}});
+ root.addEventListener('focusout',()=>{setTimeout(()=>{if(!pinned&&!panel.contains(document.activeElement)&&!document.activeElement?.matches('[data-reason]'))hide();},0);});
+ document.addEventListener('pointerdown',e=>{if(!panel.contains(e.target)&&!e.target.closest('[data-reason]'))hide();});
+ window.addEventListener('resize',place);
+ toggle.addEventListener('click',()=>{const hidden=win.classList.toggle('ua-unmarked');toggle.textContent=hidden?'Show highlights':'Hide highlights';hide();save();});
+ function renderPrefs(){win.classList.toggle('ua-underline',prefs.style==='Underline');root.style.setProperty('--ua-percent',prefs.strength+'%');}
+ renderPrefs();
+ if(globalThis.Tweak){const tweak=new Tweak({container:win,onChange:renderPrefs});tweak.addSelect(prefs,'style',{label:'Highlight style',options:['Highlighter','Underline']});tweak.addSlider(prefs,'strength',{label:'Highlight strength',min:20,max:100,step:5,unit:'%'});}
+})();
+</script>

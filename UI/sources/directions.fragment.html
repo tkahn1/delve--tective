@@ -1,0 +1,161 @@
+<div id="unslop-directions" class="viz-carousel" aria-label="Unslop design directions">
+  <section data-variant="Quiet" aria-label="Quiet browser utility"><div class="us-preview quiet" data-style="quiet"></div></section>
+  <section data-variant="Margin" aria-label="Margin reading companion" hidden><div class="us-preview margin" data-style="margin"></div></section>
+  <section data-variant="Inspector" aria-label="Evidence inspector" hidden><div class="us-preview inspector" data-style="inspector"></div></section>
+</div>
+<style>
+#unslop-directions { color-scheme:light dark; }
+#unslop-directions * { box-sizing:border-box; }
+#unslop-directions [hidden] { display:none !important; }
+#unslop-directions .us-preview { --us-paper:light-dark(#fff,#191b1d);--us-ink:light-dark(#202124,#e9eaeb);--us-muted:light-dark(#62666b,#a8adb4);--us-rule:light-dark(#e4e6e9,#3c4146);--us-soft:light-dark(#f6f7f8,#25292d);--us-flag:light-dark(#a84a12,#f4ad78);--us-wash:light-dark(#fff5eb,#342a24);--us-link:light-dark(#1a4fbb,#a7c2ff);--us-radius:6px;font:14px/1.55 Arial,Helvetica,sans-serif;color:var(--us-ink);min-height:760px; }
+#unslop-directions .us-preview.margin {--us-paper:light-dark(#fffefa,#1c1c19);--us-soft:light-dark(#f6f4ee,#282823);--us-rule:light-dark(#e1dfd5,#414138);--us-flag:light-dark(#93511f,#edb07f);--us-radius:2px;font-family:Georgia,'Times New Roman',serif; }
+#unslop-directions .us-preview.inspector {--us-paper:light-dark(#fbfcfd,#181d23);--us-soft:light-dark(#eef2f6,#242d38);--us-rule:light-dark(#d8e0e8,#394554);--us-muted:light-dark(#536274,#b0bccb);--us-radius:3px;font-family:'Segoe UI',Arial,sans-serif; }
+#unslop-directions button,#unslop-directions select { font:inherit; }
+#unslop-directions button {color:inherit;cursor:inherit;touch-action:manipulation; }
+#unslop-directions button:focus-visible,#unslop-directions select:focus-visible {outline:2px solid var(--us-link);outline-offset:3px; }
+#unslop-directions .us-meta {display:flex;justify-content:space-between;gap:12px;align-items:baseline;flex-wrap:wrap;padding:8px 0 14px;font:12px/1.4 Arial,sans-serif;color:var(--us-muted); }
+#unslop-directions .us-name {font-size:16px;color:var(--us-ink);font-weight:600; }
+#unslop-directions .us-shell {background:var(--us-paper);border:1px solid var(--us-rule);border-radius:var(--us-radius);min-height:680px;overflow:clip; }
+#unslop-directions .us-previewbar {display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;background:var(--us-soft);border-bottom:1px solid var(--us-rule);padding:10px 18px;font:12px/1.4 Arial,sans-serif; }
+#unslop-directions .us-tabs {display:flex;gap:2px;flex-wrap:wrap; }
+#unslop-directions .us-tabs button {padding:7px 11px;border:0;border-radius:3px;background:transparent;color:var(--us-muted); }
+#unslop-directions .us-tabs button[aria-pressed=true] {background:var(--us-paper);color:var(--us-ink);box-shadow:0 1px 2px light-dark(#00000012,#00000040); }
+#unslop-directions .us-body {padding:28px 34px;min-height:610px;position:relative; }
+#unslop-directions .us-top {display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:22px; }
+#unslop-directions .us-brand {display:flex;align-items:center;gap:8px;font:600 16px/1.3 Arial,sans-serif; }
+#unslop-directions .us-brand i {width:18px;height:18px; }
+#unslop-directions .us-small {font-size:12px;color:var(--us-muted); }
+#unslop-directions .us-sentence {display:flex;align-items:center;gap:8px;flex-wrap:wrap;color:var(--us-muted);font-size:12px;border-bottom:1px solid var(--us-rule);padding:0 0 12px;margin-bottom:24px; }
+#unslop-directions .us-sentence strong {font-weight:500;color:var(--us-ink); }
+#unslop-directions .us-query {padding:10px 16px;border:1px solid var(--us-rule);border-radius:24px;display:flex;align-items:center;gap:10px;max-width:580px;margin-bottom:18px; }
+#unslop-directions .us-query i {width:16px; }
+#unslop-directions .us-result {max-width:650px;margin:0 0 25px; }
+#unslop-directions .us-domain {font:12px/1.5 Arial,sans-serif;color:var(--us-muted);margin-bottom:3px; }
+#unslop-directions .us-title {font:400 19px/1.3 Arial,Helvetica,sans-serif;color:var(--us-link);margin:0 0 5px; }
+#unslop-directions .us-description {margin:0;font-size:13px;max-width:610px; }
+#unslop-directions .us-result.is-dim .us-title,#unslop-directions .us-result.is-dim .us-description {color:var(--us-muted); }
+#unslop-directions .us-reason {margin-top:7px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;font:12px/1.5 Arial,sans-serif;color:var(--us-flag); }
+#unslop-directions .us-dot {width:5px;height:5px;border-radius:50%;background:var(--us-flag);flex:none; }
+#unslop-directions .us-textbutton {border:0;background:none;padding:2px 0;text-decoration:underline;text-underline-offset:3px;font:12px/1.5 Arial,sans-serif;color:var(--us-muted); }
+#unslop-directions .us-textbutton:hover {color:var(--us-ink); }
+#unslop-directions .us-note {font:12px/1.5 Arial,sans-serif;color:var(--us-muted);margin:14px 0 0; }
+#unslop-directions .us-details {border:1px solid var(--us-rule);background:var(--us-soft);padding:12px 14px;margin-top:10px;max-width:580px;border-radius:var(--us-radius);font:13px/1.5 Arial,sans-serif; }
+#unslop-directions .us-details p {margin:4px 0; }
+#unslop-directions .us-evidence {display:grid;grid-template-columns:1fr auto;gap:8px;padding:8px 0;border-bottom:1px solid var(--us-rule); }
+#unslop-directions .us-pill {border:1px solid var(--us-rule);background:var(--us-paper);color:var(--us-ink);border-radius:var(--us-radius);padding:6px 10px;font:12px/1.4 Arial,sans-serif; }
+#unslop-directions .us-pill:hover {background:var(--us-soft); }
+#unslop-directions .us-search-tools {margin-left:auto; }
+#unslop-directions .us-article {max-width:640px;margin:auto; }
+#unslop-directions .us-article h1 {font:500 30px/1.15 Georgia,serif;margin:8px 0 18px;letter-spacing:-.5px; }
+#unslop-directions .us-article p {margin:14px 0;font:16px/1.65 Georgia,serif; }
+#unslop-directions .us-image {height:145px;position:relative;background:var(--us-soft);display:flex;align-items:center;justify-content:center;border:1px solid var(--us-rule);margin-bottom:14px;color:var(--us-muted); }
+#unslop-directions .us-image span {font:12px/1.4 Arial,sans-serif; }
+#unslop-directions .us-image button {position:absolute;bottom:8px;left:8px; }
+#unslop-directions .us-mark {position:relative;outline:1px dashed color-mix(in srgb,var(--us-flag) 70%,transparent);outline-offset:6px;border-radius:2px; }
+#unslop-directions .us-mark:hover,#unslop-directions .us-mark:focus-within {background:var(--us-wash); }
+#unslop-directions .us-mark-button {float:right;margin:0 0 3px 8px;color:var(--us-flag);border:0;background:var(--us-paper);padding:2px 5px;font:12px/1.5 Arial,sans-serif; }
+#unslop-directions .us-float {position:absolute;right:18px;bottom:18px;z-index:2; }
+#unslop-directions .us-float .us-pill {display:flex;align-items:center;gap:6px; }
+#unslop-directions .us-float .us-details {position:absolute;right:0;bottom:100%;width:260px;background:var(--us-paper);box-shadow:0 4px 18px light-dark(#00000010,#00000045); }
+#unslop-directions .us-popup-stage {display:flex;justify-content:center;padding-top:10px;background:var(--us-soft);min-height:560px; }
+#unslop-directions .us-popup {width:360px;max-width:100%;height:max-content;background:var(--us-paper);border:1px solid var(--us-rule);border-radius:var(--us-radius);box-shadow:0 7px 25px light-dark(#0000000c,#00000030);font:13px/1.5 Arial,sans-serif; }
+#unslop-directions .us-popup header {display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--us-rule); }
+#unslop-directions .us-popup-section {padding:16px 18px;border-bottom:1px solid var(--us-rule); }
+#unslop-directions .us-popup h2 {font:500 18px/1.3 Arial,sans-serif;margin:4px 0 10px; }
+#unslop-directions .us-popup p {margin:5px 0; }
+#unslop-directions .us-switch {display:flex;align-items:center;gap:8px; }
+#unslop-directions input[type=checkbox] {accent-color:var(--us-ink);width:16px;height:16px; }
+#unslop-directions .us-popup select {padding:5px 8px;border:1px solid var(--us-rule);background:var(--us-paper);color:var(--us-ink);border-radius:3px; }
+#unslop-directions .us-popup label {display:flex;justify-content:space-between;align-items:center;gap:10px;margin:8px 0; }
+#unslop-directions .us-pop-reason {padding:7px 0;display:flex;gap:8px;align-items:baseline; }
+#unslop-directions .us-countline {display:flex;gap:20px;flex-wrap:wrap;font-size:12px;color:var(--us-muted); }
+#unslop-directions .us-countline b {font-weight:500;color:var(--us-ink); }
+#unslop-directions .us-report h1 {font-size:23px;font-weight:500;letter-spacing:-.3px;margin:0; }
+#unslop-directions .us-report-summary {display:flex;flex-wrap:wrap;gap:20px;padding:0 0 22px;margin-bottom:24px;border-bottom:1px solid var(--us-rule); }
+#unslop-directions .us-report-summary b {font-size:22px;display:block;font-weight:500;font-variant-numeric:tabular-nums; }
+#unslop-directions .us-report-summary span {font:12px Arial,sans-serif;color:var(--us-muted); }
+#unslop-directions .us-chart {display:flex;align-items:end;gap:14px;height:130px;margin:18px 0 28px;max-width:540px; }
+#unslop-directions .us-barcol {flex:1;height:100%;display:flex;flex-direction:column;justify-content:end;align-items:center;gap:5px;font:11px/1.4 Arial,sans-serif;color:var(--us-muted); }
+#unslop-directions .us-bar {background:var(--us-ink);opacity:.8;width:100%;max-width:28px;border-radius:2px 2px 0 0; }
+#unslop-directions .us-table {border-collapse:collapse;width:100%;text-align:left;font:12px/1.5 Arial,sans-serif; }
+#unslop-directions .us-table td,#unslop-directions .us-table th {padding:10px 6px;border-bottom:1px solid var(--us-rule);font-weight:400;vertical-align:top; }
+#unslop-directions .us-table th {color:var(--us-muted); }
+#unslop-directions .us-table td:last-child {text-align:right;font-variant-numeric:tabular-nums; }
+#unslop-directions .margin .us-body {padding:30px 42px; }
+#unslop-directions .margin .us-brand {font:500 24px/1.2 Georgia,serif;letter-spacing:-.6px; }
+#unslop-directions .margin .us-sentence {border:0;margin-bottom:18px; }
+#unslop-directions .margin .us-result {display:grid;grid-template-columns:30px 1fr;column-gap:10px; }
+#unslop-directions .margin .us-result .us-number {grid-row:1/6;font:italic 17px Georgia,serif;color:var(--us-muted); }
+#unslop-directions .margin .us-title {font:400 21px/1.25 Georgia,serif;color:var(--us-ink); }
+#unslop-directions .margin .us-reason {border:0;background:none; }
+#unslop-directions .margin .us-article {max-width:570px; }
+#unslop-directions .margin .us-mark {outline:0;border-bottom:1px dashed var(--us-flag);border-radius:0; }
+#unslop-directions .margin .us-popup h2 {font:500 25px/1.3 Georgia,serif; }
+#unslop-directions .margin .us-report h1 {font:500 30px Georgia,serif; }
+#unslop-directions .margin .us-report-summary {gap:30px; }
+#unslop-directions .margin .us-bar {background:var(--us-flag);opacity:.7;max-width:15px; }
+#unslop-directions .inspector .us-body {padding:24px; }
+#unslop-directions .inspector .us-sentence {background:var(--us-soft);border:0;padding:10px 12px;margin-bottom:18px; }
+#unslop-directions .inspector .us-title {font-size:16px;font-weight:500; }
+#unslop-directions .inspector .us-result {padding:14px 0;border-bottom:1px solid var(--us-rule);margin:0;max-width:none; }
+#unslop-directions .inspector .us-reason {color:var(--us-ink); }
+#unslop-directions .inspector .us-article h1 {font:500 26px/1.2 'Segoe UI',Arial,sans-serif; }
+#unslop-directions .inspector .us-article p {font:14px/1.65 'Segoe UI',Arial,sans-serif; }
+#unslop-directions .inspector .us-mark {outline:0;border:1px solid var(--us-rule);padding:10px;border-radius:3px; }
+#unslop-directions .inspector .us-mark-button {float:none;display:block;margin:0 0 6px;padding:0; }
+#unslop-directions .inspector .us-report-summary {gap:36px; }
+#unslop-directions .inspector .us-report-summary b {font:500 21px Consolas,monospace; }
+#unslop-directions .inspector .us-popup-stage {justify-content:flex-start; }
+#unslop-directions .inspector .us-popup {width:390px; }
+#unslop-directions .us-status {font:12px Arial,sans-serif;color:var(--us-muted);margin:8px 0;min-height:18px; }
+@media(max-width:600px) {#unslop-directions .us-body,#unslop-directions .margin .us-body,#unslop-directions .inspector .us-body {padding:20px 16px;}#unslop-directions .us-preview{min-height:870px;}#unslop-directions .us-shell{min-height:790px;}#unslop-directions .us-body{min-height:700px;}#unslop-directions .us-title{font-size:17px;}#unslop-directions .us-previewbar{padding:10px;}#unslop-directions .us-popup-stage{padding:12px 0;}#unslop-directions .us-report-summary{gap:16px;}#unslop-directions .us-float .us-details{width:240px;}#unslop-directions .us-table td,#unslop-directions .us-table th{padding:8px 3px;} }
+@media(pointer:coarse){#unslop-directions button,#unslop-directions select{min-height:44px;} }
+@media(prefers-reduced-motion:reduce){#unslop-directions *{scroll-behavior:auto;} }
+</style>
+<script>
+(() => {
+ const root=document.getElementById('unslop-directions');
+ const labels={quiet:['Quiet','Familiar browser controls. Small signals, details when you ask.'],margin:['Margin','A reading companion. Annotations sit beside the content.'],inspector:['Inspector','An evidence-first utility. Compact rows and explicit checks.']};
+ const samples=[['kitchenlab.example','The coffee grinders we actually tested','We brewed with six grinders for a month. Here are the differences in grind consistency, noise, and cleanup.',false],['bestkitchenpicks.example','Best Coffee Grinders 2026: Our Top Picks','Find the perfect companion for your coffee journey with our comprehensive guide to the best grinders.',true],['coffeeforum.example','Which grinder did you keep after a year?','The adjustment collar is stiff, but mine is still going after two years. The grounds catcher could be better.',false]];
+ const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ const icon=n=>`<i data-lucide="${n}" aria-hidden="true"></i>`;
+ const detail=`<p><strong>Matching content in the local index</strong></p><p>Similar passages appear on 3 indexed sites.</p><div class="us-evidence"><span>bestkitchenpicks.example</span><span>This page</span></div><div class="us-evidence"><span>grinder-guide.example</span><span>Match</span></div><div class="us-evidence"><span>dailybrews.example</span><span>Match</span></div><p class="us-small">Matching content can include legitimate syndication.</p>`;
+ function result(s,i,key){return `<div class="us-result ${s[3]?'is-dim':''}">${key==='margin'?`<span class="us-number">${i+1}</span>`:''}<div class="us-domain">${s[0]}</div><h2 class="us-title">${s[1]}</h2><p class="us-description">${s[2]}</p>${s[3]?`<div class="us-reason"><span class="us-dot"></span><span>Similar content on 3 indexed sites</span><button type="button" class="us-textbutton cursor-interaction" data-action="evidence" aria-expanded="false">${key==='inspector'?'Inspect evidence':'Why?'}</button><button type="button" class="us-textbutton cursor-interaction" data-action="reveal">Show anyway</button></div><div class="us-details" data-detail hidden>${detail}</div>`:''}</div>`;}
+ function search(key){return `<div class="us-top"><div class="us-brand">${icon('eye')} Unslop</div><span class="us-small">Search annotations</span></div><div class="us-query">${icon('search')}<span>best coffee grinder 2026</span></div><div class="us-sentence"><strong>1 result worth a second look</strong><span>Checked on this device</span><button class="us-textbutton us-search-tools cursor-interaction" data-action="hide" type="button">Hide flagged result</button></div><div class="us-results">${samples.map((s,i)=>result(s,i,key)).join('')}</div><p class="us-status" aria-live="polite"></p>`;}
+ function article(key){return `<article class="us-article"><div class="us-domain">bestkitchenpicks.example / buying guides</div><h1>A better start to your morning coffee</h1><div class="us-image"><span>Article image · sample</span><button class="us-pill cursor-interaction" type="button" data-action="image" aria-expanded="false">Image signal · uncertain</button></div><div class="us-details" data-image-detail hidden><strong>Possible synthetic image</strong><p>This sample shows the proposed image annotation. It is not a live detector result.</p></div><p class="us-small">October 24, 2026 · Buying guide</p><p>Choosing a grinder starts with how you brew. Espresso needs finer adjustment than a French press, while a small kitchen may make size the deciding factor.</p><div class="us-mark"><button class="us-mark-button cursor-interaction" type="button" data-action="paragraph" aria-expanded="false">${key==='inspector'?'View paragraph evidence':'Why this mark?'}</button><p>In today’s fast-paced world, finding the perfect coffee grinder can be a game-changer for your morning routine. Let’s dive into the possibilities.</p></div><div class="us-details" data-paragraph-detail hidden><strong>Worth a second look</strong><p>Flagged by the text check.</p><p class="us-small">A writing-pattern signal, not a verdict on accuracy or authorship. Checks can be wrong.</p></div><p>Look at grind adjustment, repair options, and cleaning before paying for connected features.</p></article><div class="us-float"><div class="us-details" data-page-detail hidden><strong>Worth a second look</strong><p>Similar content in the local index.</p><button type="button" class="us-textbutton cursor-interaction" data-action="popup">See page checks</button></div><button type="button" class="us-pill cursor-interaction" data-action="page" aria-expanded="false">${icon('eye')}<span>Page checks</span></button></div>`;}
+ function popup(key){return `<div class="us-popup-stage"><section class="us-popup" aria-label="Extension popup"><header><div class="us-brand">${icon('eye')} Unslop</div><label class="us-switch"><span class="us-small">On</span><input type="checkbox" checked data-action="enabled" aria-label="Enable Unslop"></label></header><div class="us-popup-section"><div class="us-domain">bestkitchenpicks.example</div><h2>${key==='inspector'?'Page evidence':'Worth a second look'}</h2><div class="us-pop-reason"><span class="us-dot"></span><span>Similar content on 3 indexed sites</span></div><div class="us-pop-reason"><span class="us-dot"></span><span>2 paragraphs flagged by the text check</span></div><button type="button" class="us-textbutton cursor-interaction" data-action="pop-details" aria-expanded="false">Review reasons</button><div class="us-details" data-pop-detail hidden><p>These are sample signals, not proof that the content is false or entirely AI-generated.</p></div></div><div class="us-popup-section"><label><span>Flagged search results</span><select aria-label="Display flagged results"><option>Dim</option><option>Hide</option></select></label><label><span>Check this site</span><input type="checkbox" checked aria-label="Check this site"></label></div><div class="us-popup-section"><div class="us-countline"><span><b>12</b> results dimmed this week</span><span><b>4</b> pages flagged</span></div></div><div class="us-popup-section"><button type="button" class="us-textbutton cursor-interaction" data-action="activity">Browsing activity</button><p class="us-small">Stored on this device only</p></div></section></div>`;}
+ function activity(key){const vals=[1,2,0,3,2,3,1],days=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];return `<section class="us-report"><div class="us-top"><h1>Browsing activity</h1><span class="us-small">This week · sample</span></div><div class="us-report-summary"><div><b>12</b><span>results dimmed</span></div><div><b>4</b><span>pages flagged</span></div><div><b>6</b><span>paragraphs marked</span></div></div><div class="us-domain">Results dimmed each day</div>${key==='inspector'?`<table class="us-table"><thead><tr><th>Day</th><th>Results dimmed</th></tr></thead><tbody>${days.map((d,i)=>`<tr><td>${d}</td><td>${vals[i]}</td></tr>`).join('')}</tbody></table>`:`<div class="us-chart" role="img" aria-label="Sample results dimmed: Monday 1, Tuesday 2, Wednesday 0, Thursday 3, Friday 2, Saturday 3, Sunday 1">${vals.map((v,i)=>`<div class="us-barcol"><span>${v}</span><div class="us-bar" style="height:${v*28}px"></div><span>${days[i]}</span></div>`).join('')}</div>`}<table class="us-table"><thead><tr><th>Site</th><th>Most common reason</th><th>Count</th></tr></thead><tbody><tr><td>bestkitchenpicks.example</td><td>Similar indexed content</td><td>3</td></tr><tr><td>dailybrews.example</td><td>On the site list</td><td>1</td></tr></tbody></table><p class="us-note">Counted on this device. Browsing data is never uploaded.</p></section>`;}
+ const saved=globalThis.openai?.widgetState;
+ const prefs={density:18,marks:true};
+ const states={};
+ root.querySelectorAll('[data-style]').forEach(stage=>{
+  const key=stage.dataset.style,info=labels[key];
+  const state=states[key]={screen:saved?.privateContent?.[key]?.screen||'search'};
+  stage.innerHTML=`<div class="us-meta"><span><span class="us-name">${info[0]}</span> &nbsp; ${info[1]}</span><span>Sample content</span></div><div class="us-shell"><div class="us-previewbar"><span>Preview screen</span><nav class="us-tabs" aria-label="${info[0]} sample screens">${['search','article','popup','activity'].map(s=>`<button type="button" class="cursor-interaction" data-screen="${s}" aria-pressed="false">${s[0].toUpperCase()+s.slice(1)}</button>`).join('')}</nav></div><div class="us-body"></div></div>`;
+  const body=stage.querySelector('.us-body');
+  function render(){body.innerHTML=({search,article,popup,activity}[state.screen])(key);stage.querySelectorAll('[data-screen]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.screen===state.screen)));if(globalThis.lucide)lucide.createIcons({attrs:{width:16,height:16}});applyPrefs();}
+  function persist(){if(globalThis.openai?.setWidgetState)globalThis.openai.setWidgetState({modelContent:{previewScreens:Object.fromEntries(Object.entries(states).map(([k,v])=>[k,v.screen]))},privateContent:states}).catch(()=>{});}
+  function toggle(button,target){if(!target)return;target.hidden=!target.hidden;button.setAttribute('aria-expanded',String(!target.hidden));}
+  stage.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.screen){state.screen=b.dataset.screen;render();persist();return;}const action=b.dataset.action;
+   if(action==='evidence')toggle(b,b.closest('.us-result').querySelector('[data-detail]'));
+   if(action==='reveal'){const row=b.closest('.us-result');row.classList.remove('is-dim');row.querySelector('.us-reason').hidden=true;row.querySelector('[data-detail]').hidden=true;body.querySelector('.us-status').textContent='Result restored. This override only affects this preview.';}
+   if(action==='hide'){const row=body.querySelector('.us-results .is-dim');if(row){row.hidden=!row.hidden;b.textContent=row.hidden?'Show flagged result':'Hide flagged result';}}
+   if(action==='paragraph'){const pinned=b.dataset.pinned!=='true';b.dataset.pinned=String(pinned);body.querySelector('[data-paragraph-detail]').hidden=!pinned;b.setAttribute('aria-expanded',String(pinned));}
+   if(action==='image')toggle(b,body.querySelector('[data-image-detail]'));
+   if(action==='page'){const pinned=b.dataset.pinned!=='true';b.dataset.pinned=String(pinned);body.querySelector('[data-page-detail]').hidden=!pinned;b.setAttribute('aria-expanded',String(pinned));}
+   if(action==='pop-details')toggle(b,body.querySelector('[data-pop-detail]'));
+   if(action==='popup'||action==='activity'){state.screen=action;render();persist();}
+  });
+  stage.addEventListener('keydown',e=>{if(e.key==='Escape'){stage.querySelectorAll('[data-detail],[data-paragraph-detail],[data-image-detail],[data-page-detail],[data-pop-detail]').forEach(d=>d.hidden=true);stage.querySelectorAll('[aria-expanded=true]').forEach(b=>{b.setAttribute('aria-expanded','false');b.dataset.pinned='false';});}});
+  stage.addEventListener('change',e=>{if(e.target.dataset.action==='enabled'){const section=stage.querySelector('.us-popup-section');section.style.opacity=e.target.checked?'1':'.55';}});
+  function hoverDetail(e,open){const b=e.target.closest('[data-action=paragraph],[data-action=page]');if(!b||b.contains(e.relatedTarget))return;const target=body.querySelector(b.dataset.action==='page'?'[data-page-detail]':'[data-paragraph-detail]');if(!target)return;if(open||b.dataset.pinned!=='true'){target.hidden=!open;b.setAttribute('aria-expanded',String(open));}}
+  stage.addEventListener('pointerover',e=>hoverDetail(e,true));
+  stage.addEventListener('pointerout',e=>hoverDetail(e,false));
+  stage.addEventListener('focusin',e=>hoverDetail(e,true));
+  stage.addEventListener('focusout',e=>hoverDetail(e,false));
+  render();
+ });
+ function applyPrefs(){root.querySelectorAll('.us-query').forEach(el=>el.style.paddingBlock=`${Math.max(6,prefs.density/2)}px`);root.querySelectorAll('.us-mark').forEach(el=>el.style.outlineWidth=prefs.marks?'':'0px');}
+ if(globalThis.Tweak){const tweaks=new Tweak({container:root,onChange:applyPrefs});tweaks.addSlider(prefs,'density',{label:'Spacing',min:12,max:24,step:2,unit:'px'});tweaks.addToggle(prefs,'marks',{label:'Paragraph outlines'});}
+})();
+</script>

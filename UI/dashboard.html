@@ -1,0 +1,11 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Unslop — Browsing activity preview</title><link rel="stylesheet" href="assets/dashboard.css"></head>
+<body><main class="dashboard">
+ <header class="brand-row"><a class="brand" href="index.html">Unslop</a><span class="preview-label">Design preview · sample data</span></header>
+ <div class="heading-row"><div><h1>Browsing activity</h1><p id="date-range" class="muted"></p></div><nav class="ranges" aria-label="Activity time range"><button type="button" data-range="week" aria-pressed="true">This week</button><button type="button" data-range="month" aria-pressed="false">Month</button><button type="button" data-range="all" aria-pressed="false">All time</button></nav></div>
+ <section class="totals" aria-label="Activity totals" aria-live="polite"><div><strong id="total-dimmed">0</strong><span>results dimmed</span></div><div><strong id="total-pages">0</strong><span>pages flagged</span></div><div><strong id="total-paragraphs">0</strong><span>paragraphs outlined</span></div></section>
+ <section class="chart-section"><div class="section-heading"><h2 id="chart-title">Results dimmed each day</h2><span id="chart-detail" class="muted" aria-live="polite">Select a bar for its count</span></div><div id="activity-chart" class="activity-chart" role="group" aria-label="Results dimmed by day"></div></section>
+ <div class="detail-grid"><section><h2>Sites flagged most</h2><table><thead><tr><th scope="col">Site and reason</th><th scope="col" class="numeric">Count</th></tr></thead><tbody id="sites"></tbody></table></section><section><h2>Reasons recorded</h2><div id="reasons" class="reasons"></div><p class="small muted">A result can have several reasons. These counts are not independent votes.</p></section></div>
+ <footer>Counted on this device only. The installed extension stores domains and counts, not page text or full URLs. <span class="preview-foot">This preview uses fictional domains and sample counts.</span></footer>
+</main><script type="module" src="dashboard.js"></script></body></html>

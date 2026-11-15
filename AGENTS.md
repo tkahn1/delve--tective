@@ -55,7 +55,18 @@ extension/            # the Chrome extension (CONTRACT.md = shared interfaces)
 pipeline/             # Python: site list, fingerprints, model export, eval
 demo/pages/           # saved/mock demo pages (see demo/README.md)
 eval/                 # test sets (gitignored) + RESULTS.md
+UI/                   # Arnav's standalone UI previews, sample dashboard, and integration/testing notes
 ```
+
+## UI work (Arnav)
+
+- **Chosen direction:** Quiet browser utility. Keep the host page readable; small word/phrase highlights with reasons on hover, keyboard focus, or click. Avoid an always-open side panel and oversized dashboard meters/cards.
+- **Review package:** serve the repo root (`python -m http.server 8080`) and open `/UI/`. Includes the article highlight preview, all three design directions, and a Quiet dashboard with working time ranges. `UI/README.md` explains integration; `UI/TESTING.md` records supported targets and setup gaps.
+- **Truth boundary:** previews use labeled sample findings/counts, not live detector results. The installed extension still uses `extension/src/ui`, `popup`, and `report`. Do not replace real worker output with preview data.
+- **Shared interfaces:** preserve `extension/CONTRACT.md` and `src/engine/messages.ts`. The current model returns paragraph/chunk flags, not causal word explanations; exact phrase/copy ranges require explicit evidence additions. Images are not implemented yet.
+- **Dashboard data:** the standalone dashboard uses the actual `summarize(Stats, range, now)` function, bundled by `node UI/build-preview.mjs`, with separate fictional fixtures. Use `stats/get` for eventual live integration.
+- **Reference documents:** `Unslop UI 2.pdf`, `unslop-plan.pdf`, and `UI-REFERENCES.md` live at the repo root. The user's current UI decisions take priority over the reference PDFs.
+- **Comments/reviews are not supported:** Amazon and Reddit are allowlisted, comment containers are skipped, and short per-item content has no dedicated adapter/evaluation. Do not silently remove these safeguards during a UI pass.
 
 ## Known gotchas (updated 2026-11-14)
 
@@ -99,7 +110,7 @@ _TODO: who owns which area, so agents (and people) know whose code they're touch
 
 | Area | Owner |
 | ---- | ----- |
-|      |       |
+| UI direction, article highlights, popup/dashboard presentation | Arnav |
 |      |       |
 |      |       |
 |      |       |
