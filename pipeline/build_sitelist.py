@@ -9,6 +9,7 @@ Inputs (pipeline/data/):
 
 Outputs (extension/src/data/):
   sites.json, allowlist.json, builders.json   (formats in extension/CONTRACT.md)
+  sites_bloom.json   Bloom filters of the farm / builder domains (what the extension ships; see pipeline/bloom.py)
 
 Usage:  python pipeline/build_sitelist.py
 """
@@ -19,6 +20,7 @@ import json
 import sys
 
 from common import EXT_DATA, PIPE_DATA, registrable_domain, write_json
+import bloom
 
 REASONS = {"farm", "builder"}
 
@@ -79,6 +81,15 @@ def main() -> None:
         sys.exit(f"domains on both the site list and the allowlist: {clash}")
 
     write_json(EXT_DATA / "sites.json", dict(sorted(sites.items())))
+    # The extension ships Bloom filters (compact, scales to millions of domains); sites.json stays
+    # for the pipeline. One filter per reason so the reason survives; 1e-5 false-positive rate.
+    filters = {}
+    for reason in ("farm", "builder"):
+        doms = sorted(d for d, r in sites.items() if r == reason)
+        filters[reason] = bloom.build(doms) if doms else None
+        if doms:
+            assert all(bloom.contains(filters[reason], d) for d in doms)
+    write_json(EXT_DATA / "sites_bloom.json", {"version": 1, "hash": "fnv1a32-double", "filters": filters})
     write_json(EXT_DATA / "allowlist.json", allow)
     write_json(EXT_DATA / "builders.json", builders)
 
