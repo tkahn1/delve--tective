@@ -24,11 +24,44 @@ async function getSettings(): Promise<Settings> {
   }
 }
 
+/**
+ * One running copy per tab. When the extension is reloaded or updated, Chrome cuts the old content script off
+ * (chrome.runtime.id becomes undefined) but leaves it and its UI in the page, and the worker injects a fresh copy
+ * into YouTube / Reddit tabs. The fresh copy replaces a dead one instead of bowing out to it, and a dead copy
+ * removes its own flags so nothing stale is left behind.
+ */
+interface Instance {
+  alive(): boolean;
+  teardown(): void;
+}
+type UnslopWindow = Window & { __unslopInstance?: Instance };
+
+/** Remove everything a content script put in the page (shadow hosts and dim/hide marks). */
+function removeOurUi(): void {
+  document.querySelectorAll('[data-unslop-ui]').forEach((e) => e.remove());
+  for (const attr of ['data-unslop-dim', 'data-unslop-hidden']) {
+    document.querySelectorAll(`[${attr}]`).forEach((e) => e.removeAttribute(attr));
+  }
+}
+
+const extensionAlive = (): boolean => {
+  try {
+    return !!chrome.runtime?.id;
+  } catch {
+    return false;
+  }
+};
+
 async function main() {
   if (window.top !== window) return;
   if (location.protocol === 'chrome-extension:') return;
-  if ((window as unknown as { __unslopLoaded?: boolean }).__unslopLoaded) return;
-  (window as unknown as { __unslopLoaded?: boolean }).__unslopLoaded = true;
+  const w = window as UnslopWindow;
+  const prev = w.__unslopInstance;
+  if (prev?.alive()) return; // already running
+  if (prev) {
+    prev.teardown(); // left over from before the extension was reloaded
+    removeOurUi();
+  }
 
   const url = resolveUrl(location.href);
   let hostname = '';
@@ -76,6 +109,32 @@ async function main() {
     if (controller) controller.update(s);
     else controller = kind === 'search' ? startSearch(url, s, engine ?? 'google') : startPage(url, domain, s);
   };
+
+  let torn = false;
+  const teardown = () => {
+    if (torn) return;
+    torn = true;
+    window.clearInterval(watch);
+    try {
+      controller?.destroy();
+    } catch {
+      /* already cut off */
+    }
+    try {
+      copies?.destroy();
+    } catch {
+      /* already cut off */
+    }
+    controller = null;
+    copies = null;
+  };
+  w.__unslopInstance = { alive: () => !torn && extensionAlive(), teardown };
+  // If the extension goes away under us, clean up our UI rather than leave dead flags in the page.
+  const watch = window.setInterval(() => {
+    if (extensionAlive()) return;
+    teardown();
+    removeOurUi();
+  }, 2000);
 
   chrome.runtime.onMessage.addListener((msg: SettingsChangedMsg) => {
     if (msg?.type === 'settings/changed' && msg.settings) apply({ ...DEFAULT_SETTINGS, ...msg.settings });

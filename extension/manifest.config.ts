@@ -31,9 +31,11 @@ export default defineManifest({
       all_frames: false,
     },
   ],
-  permissions: ['storage', 'offscreen', 'tabs', 'activeTab', 'contextMenus'],
-  // Only used when the user saves a YouTube Data API key (comment copies, background/commentCopies.ts).
-  host_permissions: ['https://www.googleapis.com/*'],
+  // scripting: re-inject the content script into open YouTube / Reddit tabs after a reload (service-worker.ts).
+  permissions: ['storage', 'offscreen', 'tabs', 'activeTab', 'contextMenus', 'scripting'],
+  // googleapis: only used when the user saves a YouTube Data API key (background/commentCopies.ts).
+  // YouTube / Reddit: already covered by the <all_urls> content script; listed so re-injection is allowed.
+  host_permissions: ['https://www.googleapis.com/*', 'https://*.youtube.com/*', 'https://*.reddit.com/*'],
   options_page: 'src/options/index.html',
   content_security_policy: {
     extension_pages: "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'",

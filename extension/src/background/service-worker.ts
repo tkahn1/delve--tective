@@ -616,10 +616,29 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
   })();
 });
 
+/**
+ * After an install, reload or update, content scripts already in open tabs are cut off and new ones only load
+ * on the next page load. Put a fresh copy into open YouTube / Reddit tabs (where comment copies run) so they work
+ * without a refresh; content/index.ts replaces the dead copy. Other sites still need a reload, so the heavy page
+ * check doesn't rerun in every open tab at once.
+ */
+async function reinjectOpenTabs(): Promise<void> {
+  const files = chrome.runtime.getManifest().content_scripts?.[0]?.js ?? [];
+  if (!files.length || !chrome.scripting) return;
+  const tabs = await chrome.tabs.query({ url: ['https://*.youtube.com/*', 'https://*.reddit.com/*'] });
+  for (const tab of tabs) {
+    if (tab.id == null || tab.discarded) continue;
+    chrome.scripting.executeScript({ target: { tabId: tab.id }, files }).catch(() => {
+      /* tab closed or not allowed */
+    });
+  }
+}
+
 chrome.runtime.onInstalled.addListener(() => {
   initWorkerChecks();
   warmup();
   createMenus();
+  void reinjectOpenTabs();
 });
 chrome.runtime.onStartup.addListener(() => {
   initWorkerChecks();
