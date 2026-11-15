@@ -58,10 +58,9 @@ async function main() {
   const w = window as UnslopWindow;
   const prev = w.__unslopInstance;
   if (prev?.alive()) return; // already running
-  if (prev) {
-    prev.teardown(); // left over from before the extension was reloaded
-    removeOurUi();
-  }
+  prev?.teardown(); // left over from before the extension was reloaded
+  // Clear anything an earlier copy left in the page, including builds that predate __unslopInstance.
+  removeOurUi();
 
   const url = resolveUrl(location.href);
   let hostname = '';

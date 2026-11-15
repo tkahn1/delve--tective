@@ -268,10 +268,15 @@ export function startCommentCopies(site: CopiesSite, initial: Settings): Control
       } catch (e) {
         if (live()) {
           const why = String((e as Error).message ?? e);
-          const hint = site.name === 'Reddit' && why === 'HTTP 403' ? ' (Reddit only serves comment data to logged-in users)' : '';
+          const hint =
+            site.name === 'Reddit' && why === 'HTTP 403'
+              ? ' (Reddit refused: log in to Reddit, or wait a minute if many threads were opened at once)'
+              : '';
           status.phase = 'stopped';
           status.fetch.lastError = why + hint;
-          console.warn(`[delve—tective] ${site.name} comments stopped: ${why}${hint}`);
+          // Expected conditions (refused, throttled) go to the popup; info, not warn, so they don't fill the
+          // extension's error list.
+          console.info(`[delve—tective] ${site.name} comments stopped: ${why}${hint}`);
         }
       }
     }
@@ -286,6 +291,9 @@ export function startCommentCopies(site: CopiesSite, initial: Settings): Control
     if (destroyed) return;
     const id = site.pageId(location.href);
     if (id === current) return;
+    // Background tabs wait until they're shown: after a reload every open YouTube / Reddit tab gets the script
+    // again, and scanning them all at once gets requests refused.
+    if (id && document.visibilityState === 'hidden') return;
     current = id;
     run++; // stops any scan in flight
     scan = null;
@@ -295,6 +303,7 @@ export function startCommentCopies(site: CopiesSite, initial: Settings): Control
     else send({ type: 'copies/status', status: null });
   };
   if (site.navEvent) document.addEventListener(site.navEvent, check);
+  document.addEventListener('visibilitychange', check);
   const poll = window.setInterval(check, 1000);
   check();
 
@@ -316,6 +325,7 @@ export function startCommentCopies(site: CopiesSite, initial: Settings): Control
       destroyed = true;
       run++;
       if (site.navEvent) document.removeEventListener(site.navEvent, check);
+      document.removeEventListener('visibilitychange', check);
       window.clearInterval(poll);
       window.clearTimeout(statusTimer);
       flags.destroy();

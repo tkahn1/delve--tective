@@ -121,7 +121,8 @@ export function createCommentFlags(site: FlagSite, initialMode: FlagMode): Comme
     pill.textContent = '';
     pill.append(h('span', { class: 'dot', 'aria-hidden': 'true' }), copy.pill.lead, h('b', {}, copy.pill.count), copy.pill.tail);
     pill.setAttribute('aria-label', `${copy.title}. ${copy.detail}`);
-    host.shadowRoot!.querySelector<HTMLElement>('.show')!.hidden = !hidden;
+    const show = host.shadowRoot?.querySelector<HTMLElement>('.show');
+    if (show) show.hidden = !hidden;
     host.dataset.key = `${copy.detail}|${hidden}`;
   };
 
@@ -172,7 +173,9 @@ export function createCommentFlags(site: FlagSite, initialMode: FlagMode): Comme
         continue;
       }
       const copy = describe(g!, site.where);
-      if (existing) {
+      // A pill made by an older build (no Show link) is replaced rather than updated.
+      if (existing && !existing.shadowRoot?.querySelector('.show')) existing.remove();
+      if (existing?.isConnected) {
         if (existing.dataset.key !== `${copy.detail}|${hidden}`) fill(existing, copy, hidden);
       } else header.appendChild(makeHost(copy, id!, hidden));
       st.flagged++;
