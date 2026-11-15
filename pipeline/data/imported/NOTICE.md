@@ -7,7 +7,9 @@ content sites. `pipeline/build_sitelist.py` merges them with our own `../sites.c
 Conversion (2026-11-14): kept whole-domain entries only. Dropped single-page/blog entries
 (e.g. one Medium blog), subdomain-only entries, shared hosts (pages.dev, medium.com, ...),
 domains on our allowlist, and domains already in `sites.csv`. Removed incognito.com
-(a real software company, found in a spot check), and 101 `.com.ar`/`.com.mx` domains: the
+(a real software company, found in a spot check), and on 2026-11-15 five more that look like
+real businesses or real sites: zenrows.com, flatirons.com, farmaciaintroini.it, scienceblog.com,
+eluxemagazine.com, and 101 `.com.ar`/`.com.mx` domains: the
 builder's domain parser treats those country suffixes as the domain, which would dim every site
 under them. TODO(hack): teach `registrable_domain` more country suffixes, then restore them. Entries are NOT individually verified by us.
 
