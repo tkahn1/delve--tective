@@ -45,3 +45,15 @@ The extension maps these file names to the real URLs via `config.urlMap`
 use Save page as... > "Webpage, HTML only" with the same file name, then run
 `python pipeline/build_fingerprints.py` and check its "clusters" output. For the Google pages, search
 in a signed-out window and save the same way.
+
+## Copy-check demo
+
+`copy-demo-a.html`, `copy-demo-b.html` and `copy-demo-c.html` are **made-up demo pages** on fictional `.example`
+sites. They carry the same farm-style article, lightly reworded, so the copy check can be shown locally.
+`pipeline/build_fingerprints.py` clusters them (similarity 0.79 to 0.87), and opening any one shows
+**"Flagged · Same article appears on 2 other sites"**. Their fingerprints only match these demo pages.
+
+```sh
+python -m http.server 8080 -d demo/pages   # then open http://localhost:8080/copy-demo-a.html
+```
+

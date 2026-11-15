@@ -118,6 +118,10 @@ export const config: DetectorsConfig = {
   // TODO(hack): dev-only map from saved demo pages to the real URLs they stand for.
   urlMap: {
     'google-coffee-grinder.html': 'https://www.google.com/search?q=best+coffee+grinder+2026',
+    // Copy-check demo (demo/pages/copy-demo-*.html): made-up .example sites carrying the same article.
+    'copy-demo-a.html': 'https://deskreviewhub.example/best-standing-desks-2026/',
+    'copy-demo-b.html': 'https://officegearpicks.example/top-standing-desks-2026/',
+    'copy-demo-c.html': 'https://homeworkspaceguide.example/best-standing-desk-budget-2026/',
     // Real archived pages from the same junk sites (demo/pages/archive/); these get outlines.
     'mayfairfarms-best-stanley-cups.html': 'https://www.mayfairfarms.com/best-stanley-cups/',
     'peggyomara-best-coffee-makers.html': 'https://www.peggyomara.com/best-coffee-makers/',
