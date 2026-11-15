@@ -9,4 +9,17 @@ h2 { font-size: 16px; margin: 28px 0 4px; }
 .list li.empty { color: #63564b; }
 .list button { font: inherit; font-size: 13px; color: #744e32; background: none; border: 0; cursor: pointer; min-height: 32px; padding: 0 8px; }
 .list button:focus-visible { outline: 2px solid #744e32; border-radius: 6px; }
+.yt { margin-top: 36px; padding-top: 4px; border-top: 1px solid #eee8de; }
+#ytTitle { user-select: none; }
+.field { display: flex; gap: 8px; margin: 10px 0 0; }
+.field input { flex: 1; min-width: 0; font: inherit; font-size: 14px; color: #29231f; background: #fff; border: 1px solid #ded5c8; border-radius: 6px; padding: 8px 10px; }
+.field input:focus-visible { outline: 2px solid #744e32; outline-offset: 1px; }
+.field button, .dev button { font: inherit; font-size: 13px; color: #744e32; background: #fff; border: 1px solid #ded5c8; border-radius: 6px; cursor: pointer; min-height: 36px; padding: 0 14px; }
+.field button.primary { background: #8c5c38; border-color: #8c5c38; color: #fff; font-weight: 600; }
+.field button:focus-visible, .dev button:focus-visible { outline: 2px solid #744e32; outline-offset: 2px; }
+.status { min-height: 20px; font-size: 13px; color: #674329; margin: 6px 0 0; }
+.dev { margin-top: 18px; padding: 12px 14px; background: #f3eadb; border: 1px dashed #8c5c38; border-radius: 6px; }
+.dev h3 { font-size: 14px; margin: 0 0 8px; color: #674329; }
+.check { display: flex; align-items: center; gap: 8px; font-size: 14px; cursor: pointer; }
+.check input { accent-color: #8c5c38; width: 16px; height: 16px; }
 h1{font-family:Georgia,'Times New Roman',serif;font-weight:500}.list{border-color:#ded5c8;border-radius:6px}.list li{border-color:#eee8de}.list button{color:#744e32}

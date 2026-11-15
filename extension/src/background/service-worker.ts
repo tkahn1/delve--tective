@@ -6,6 +6,7 @@ import { combine, levelAtLeast } from '../combine/combine';
 import { isAllowlisted, registrableDomain } from '../util/domain';
 import { resolveUrl } from '../content/urlmap';
 import { getStats, recordPage, recordResults } from '../storage/stats';
+import { registerCommentCopies } from './commentCopies';
 import {
   DEFAULT_SETTINGS,
   PAGE_CHECK_PORT,
@@ -111,12 +112,28 @@ function senderDomain(sender: chrome.runtime.MessageSender): string {
 
 // ---------------------------------------------------------------- tab state + badge
 
+/** Repeated comments flagged per tab (YouTube / Reddit), so the badge can show them with the page result. */
+const copiesCount = new Map<number, number>();
+const shortCount = (n: number) => (n >= 1000 ? `${Math.floor(n / 1000)}k` : String(n));
+
+function badgeText(tabId: number, state: TabState | null): string {
+  if (state?.kind === 'search') return state.dimmed > 0 ? String(state.dimmed) : '';
+  const copies = copiesCount.get(tabId) ?? 0;
+  if (copies > 0) return shortCount(copies); // flagged results on the page: repeated comments
+  return levelAtLeast(state?.level ?? null, 'medium') ? ' ' : '';
+}
+
 async function setTabState(tabId: number, state: TabState): Promise<void> {
   await chrome.storage.session.set({ [tabStateKey(tabId)]: state });
-  let text = '';
-  if (state.kind === 'search') text = state.dimmed > 0 ? String(state.dimmed) : '';
-  else text = levelAtLeast(state.level, 'medium') ? ' ' : '';
-  await setBadge(tabId, text);
+  await setBadge(tabId, badgeText(tabId, state));
+}
+
+async function onCopiesStatus(tabId: number, status: { repeats: number } | null): Promise<void> {
+  const before = copiesCount.get(tabId) ?? 0;
+  const now = status?.repeats ?? 0;
+  if (now) copiesCount.set(tabId, now);
+  else copiesCount.delete(tabId);
+  if (now !== before) await setBadge(tabId, badgeText(tabId, await getTabState(tabId)));
 }
 
 async function setBadge(tabId: number, text: string): Promise<void> {
@@ -139,7 +156,7 @@ async function getTabState(tabId: number): Promise<TabState | null> {
 
 async function clearTab(tabId: number): Promise<void> {
   await chrome.storage.session.remove([tabStateKey(tabId), searchKey(tabId)]).catch(() => {});
-  await setBadge(tabId, '');
+  await setBadge(tabId, badgeText(tabId, null)); // repeated comments still count until their port reports again
 }
 
 chrome.tabs.onUpdated.addListener((tabId, info) => {
@@ -468,6 +485,9 @@ async function handlePageCheck(port: chrome.runtime.Port, input: PageInput): Pro
     await finishPage(p);
   }
 }
+
+// YouTube comment copies (own port; see background/commentCopies.ts).
+registerCommentCopies({ onStatus: (tabId, status) => void onCopiesStatus(tabId, status) });
 
 chrome.runtime.onConnect.addListener((port) => {
   if (port.name !== PAGE_CHECK_PORT) return;

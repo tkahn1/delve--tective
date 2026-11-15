@@ -68,7 +68,46 @@ UI/                   # Arnav's standalone UI previews, sample dashboard, and in
 - **Shared interfaces:** preserve `extension/CONTRACT.md` and `src/engine/messages.ts`. The current model returns paragraph/chunk flags, not causal word explanations; exact phrase/copy ranges require explicit evidence additions. Images are not implemented yet.
 - **Dashboard data:** the standalone dashboard uses the actual `summarize(Stats, range, now)` function, bundled by `node UI/build-preview.mjs`, with separate fictional fixtures. Use `stats/get` for eventual live integration.
 - **Reference documents:** `Unslop UI 2.pdf`, `unslop-plan.pdf`, and `UI-REFERENCES.md` live at the repo root. The user's current UI decisions take priority over the reference PDFs.
-- **Comments/reviews are not supported:** Amazon and Reddit are allowlisted, comment containers are skipped, and short per-item content has no dedicated adapter/evaluation. Do not silently remove these safeguards during a UI pass.
+- **Comments/reviews:** the page/text check still skips them (Amazon and Reddit are allowlisted, comment containers are skipped). Do not silently remove these safeguards during a UI pass. Repeated comments on **YouTube videos and Reddit threads** are handled by the separate comment-copies check (see "Repeated comments" below). Amazon reviews are not supported.
+
+## Repeated comments (YouTube + Reddit, branch `feature/yt-comment-copies`)
+
+Flags comments that are copies of each other across a whole video or thread ("Repeated 15 times" pill on each
+one, a one-line summary above the comments that expands on hover). Details: `extension/CONTRACT.md` → "Comment copies".
+
+- **Code:** `src/checks/commentCopies/` (grouping, types, port messages), `src/content/copies/controller.ts`
+  (site-agnostic), `src/content/youtube/`, `src/content/reddit/`, `src/background/commentCopies.ts`
+  (grouping off the page thread + optional YouTube API), `src/ui/commentFlag.ts`, `src/ui/copiesSummary.ts`.
+  Thresholds: `config.commentCopies`. Tests: `tests/commentCopies.test.ts`.
+- **Uses the popup's controls:** "Flagged results" Dim/Hide also dims/hides repeated comments; Sensitivity
+  (buttons Less / Normal / More = stored `relaxed` / `balanced` / `strict`) changes which groups count. The popup's
+  "This page" shows a Comments line; Developer options (bottom of the popup) show scan metrics for debugging.
+- **Sends requests:** unlike the other checks, it fetches comments: YouTube's own `/youtubei/v1/next` (same origin),
+  Reddit's `.json` (same origin; **needs the user logged in to Reddit**, else 403), and Google's YouTube Data API only
+  if a key is saved in Options. Nothing is sent anywhere else and nothing is stored but counts.
+- **Gotchas:** only the visible tab scans (background tabs wait until shown). After reloading the extension, refresh
+  open YouTube/Reddit tabs (the popup says so); re-injecting into open tabs fails with this build's loader. YouTube
+  may answer 403 after many scans in a row; the fetcher slows down and retries. Live Reddit flag placement has been
+  confirmed by one user only; Claude in Chrome can't open Reddit, so test it in a normal browser.
+
+### Try it (for a teammate's agent)
+
+```sh
+git clone https://github.com/tkahn1/HACK2026.git
+cd HACK2026
+git checkout feature/yt-comment-copies
+cd extension
+npm ci
+npm test            # 83 tests, ~1 s
+npm run build       # writes extension/dist
+```
+
+Then a human: open `chrome://extensions`, turn on **Developer mode**, **Load unpacked** → `HACK2026/extension/dist`.
+Check it on a big video, e.g. https://www.youtube.com/watch?v=LGHsNaIv5os (crypto guide, ~11k comments, heavy bot
+spam): within ~40 s there is a summary bar above the comments and "Repeated N times" pills on comments; the popup's
+"This page" shows a Comments line. The console prints one `[delve—tective] Repeated comments (YouTube): …` line per
+video. Optional: a YouTube Data API key in Options makes big videos ~15 s instead of ~40 s.
+The text model (`public/models/`) is not needed for this feature; without it only the paragraph outlines are missing.
 
 ## Known gotchas (updated 2026-11-14)
 
@@ -78,7 +117,7 @@ UI/                   # Arnav's standalone UI previews, sample dashboard, and in
 - **No live Google search reliably shows listed junk sites yet** (checked 2026-11-14 in a signed-in browser): "best coffee grinder 2026" and "best air fryer 2026" returned none of the 5 listed domains. Opening listed pages directly works (badge + outlines). Candidates seen in live air-fryer results that still need checking: us.smartcopons.com, myplanetfood.com. Recheck live results before the demo.
 
 - **Model download:** the source repo (`Lynote/...-browser`) only ships `onnx/model.onnx` (fp32, ~500 MB), so `fetch_model.py` does not get the 8-bit file the extension loads. Download `onnx/model.onnx` and quantize it with `onnxruntime.quantization.quantize_dynamic(..., weight_type=QuantType.QInt8)` to `extension/public/models/fakespot-roberta/onnx/model_quantized.onnx` (~125 MB). Outputs match fp32 closely on spot checks. TODO(hack): fold this into `fetch_model.py`.
-- **Reload after every build:** each `npm run build` renames the content-script files. Click the reload arrow on Unslop in `chrome://extensions` (and reload open tabs), or the extension silently does nothing.
+- **Builds keep the same file names** (`vite.config.ts` → `output`, no content hashes, since 2026-11-15). Before, each `npm run build` renamed the content-script files and the loaded extension silently stopped working until reloaded. Now a content-script change takes effect when you refresh the page; changes to the service worker, popup or manifest still need the reload arrow on delve—tective in `chrome://extensions` (then refresh open tabs).
 - **Live Google wraps result links** as `/goto?url=<opaque token>`; the real site is read from `<cite>` (`content/engines/google.ts`). Fixture: `extension/tests/fixtures/google-live-2026-11-14.html`. Automated/headless browsers get a captcha on Google; test with a saved copy or a real browser.
 - **Outlines only show at level Medium/High** (`buildVerdict` in `background/service-worker.ts`). The text model alone outlined plain Wikipedia text, so text evidence is hidden on Low pages.
 - **Allowlisted sites are never checked** (`src/data/allowlist.json`, 77 domains incl. Wikipedia, Reddit, NYT, BBC).

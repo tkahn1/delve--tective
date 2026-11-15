@@ -20,6 +20,27 @@
         <ul id="trusted" class="list"></ul>
       </section>
       <p class="hint">Add sites from the delve—tective popup, or right-click any page or link.</p>
+
+      <section class="yt">
+        <!-- Click this heading 5 times quickly to show developer mode. -->
+        <h2 id="ytTitle">Repeated comments</h2>
+        <p class="hint">Repeated comments are flagged on YouTube videos and Reddit threads. An optional YouTube Data
+          API key makes big YouTube videos load faster (Reddit needs no key). The key stays in this browser and is
+          only sent to Google's API.</p>
+        <div class="field">
+          <input id="ytKey" type="password" placeholder="Paste a YouTube Data API key" autocomplete="off" spellcheck="false" />
+          <button id="ytSave" type="button" class="primary">Save</button>
+          <button id="ytClear" type="button">Remove</button>
+        </div>
+        <p id="ytStatus" class="status" role="status"></p>
+
+        <div id="ytDev" class="dev" hidden>
+          <h3>Developer mode</h3>
+          <label class="check"><input id="ytUseApi" type="checkbox" checked /> Use API key</label>
+          <p class="hint">Off: always use YouTube's own page requests, even with a key saved. Applies to the next video you open.</p>
+          <button id="ytExitDev" type="button">Hide developer mode</button>
+        </div>
+      </section>
     </main>
     <script type="module" src="./options.ts"></script>
   </body>

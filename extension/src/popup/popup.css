@@ -124,3 +124,17 @@ body.off #this-page { opacity: 0.6; }
 .segmented.three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .sens-help { margin-top: 6px; }
 body{width:360px;background:#faf7f1;font-size:13px}.header{padding:14px 20px;min-height:67px}.logo,.logo svg{width:32px;height:32px}.name{font-family:Georgia,'Times New Roman',serif;font-weight:600;font-size:22px;letter-spacing:-.5px}.section{padding:15px 20px}.label{letter-spacing:0;font-size:11px;font-weight:500}.headline{font-family:Inter,system-ui,sans-serif;font-size:19px;font-weight:600;line-height:1.35;margin-bottom:10px}.meter{gap:3px;margin-bottom:12px;max-width:120px}.seg{height:3px}.switch .track{width:34px;height:20px}.switch .thumb{width:14px;height:14px}.switch input:checked+.track{background:var(--flag)}.switch input:checked+.track .thumb{transform:translateX(14px)}.segmented{padding:3px;border-radius:6px}.segmented button{font-size:12px;min-height:34px}.segmented button.active{background:#faf7f1;box-shadow:none}.site-row{display:grid;grid-template-columns:1fr auto auto;gap:8px}.site-text{grid-column:1 / 3}.site-row>.switch{grid-column:3;grid-row:1}.site-row>.mark-site{grid-row:2;margin:0}.site-row>.trust{grid-column:1}.site-row>#mark-site{grid-column:2 / 4}.mark-site,.mark-site.trust{background:transparent;color:var(--flag-text);border-color:var(--border);border-radius:5px;font-size:11px}.mark-site[aria-pressed=true]{background:var(--flag-tint);color:var(--ink)}.big{font-family:Inter,system-ui,sans-serif;font-size:22px;font-weight:500}.link-row{background:#faf7f1;min-height:56px}.link-title{font-size:12px;font-weight:500}.helper,.count-label{font-size:11px}.counts{padding-top:16px;padding-bottom:16px}.reasons{font-size:12px;line-height:1.6}[hidden]{display:none!important}@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+/* Developer: YouTube API key in use or not (comment copies) */
+.dev-row{padding-top:12px;padding-bottom:10px}.dev-row .label{margin-bottom:2px}.dev-title{font-size:12px;font-weight:500}.dev-row .switch{min-height:36px}.switch input:disabled+.track{opacity:.45;cursor:not-allowed}
+.dev-chevron{transition:transform .15s}#dev-link[aria-expanded=true] .dev-chevron{transform:rotate(90deg)}.dev-row{border-top:0;padding-top:0;padding-bottom:12px;background:#faf7f1}
+/* Repeated comments (comment copies) */
+.copies-head{margin:0;font-size:14px;font-weight:600;color:var(--ink)}.copies-head b{font-family:'Space Grotesk',Inter,sans-serif;font-weight:600;color:var(--flag-text)}
+.dev-sub{margin:14px 0 6px}
+.metrics{display:grid;grid-template-columns:auto 1fr;gap:3px 12px;margin:0;font-size:11px;line-height:1.45}
+.metrics dt{color:var(--dimmed)}.metrics dd{margin:0;color:var(--ink);font-variant-numeric:tabular-nums;word-break:break-word}
+.metrics dd.warn{color:var(--flag-text);font-weight:600}
+/* Comments line inside "This page" (YouTube / Reddit) */
+.copies{margin-top:12px;padding-top:10px;border-top:1px dashed var(--border)}#page-body:empty+.copies{margin-top:0;padding-top:0;border-top:0}
+.copies-label{font-size:11px;font-weight:500;color:var(--secondary-2);margin-bottom:2px}.copies-sub{margin:2px 0 0}
+.mode-help{margin-top:6px}
+.sens-help{display:grid;gap:1px}.sens-lead{font-weight:600;color:var(--secondary)}

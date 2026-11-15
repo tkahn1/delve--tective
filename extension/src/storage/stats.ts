@@ -12,6 +12,8 @@ export interface DayStats {
   pagesFlagged: number;
   pagesHigh: number;
   paragraphs: number;
+  /** Repeated comments flagged on YouTube videos / Reddit threads (older days lack it). */
+  comments?: number;
   reasons: Record<TemplateId, number>;
   domains: Record<string, DomainStats>;
 }
@@ -23,7 +25,7 @@ export interface Stats {
 export type StatsRange = 'week' | 'month' | 'all';
 
 export interface StatsSummary {
-  totals: { dimmed: number; pagesHigh: number; paragraphs: number; pagesFlagged: number };
+  totals: { dimmed: number; pagesHigh: number; paragraphs: number; pagesFlagged: number; comments: number };
   daily: { label: string; value: number }[];
   topDomains: { domain: string; count: number; reason: TemplateId }[];
   reasons: { templateId: TemplateId; count: number }[];
@@ -65,6 +67,7 @@ export function emptyDay(): DayStats {
     pagesFlagged: 0,
     pagesHigh: 0,
     paragraphs: 0,
+    comments: 0,
     reasons: Object.fromEntries(TEMPLATE_IDS.map((t) => [t, 0])) as Record<TemplateId, number>,
     domains: {},
   };
@@ -110,6 +113,15 @@ export function applyPage(
   return stats;
 }
 
+/** A video or thread with repeated comments: counts the comments, and the page as flagged. */
+export function applyComments(stats: Stats, page: { comments: number }, now: Date = new Date()): Stats {
+  if (page.comments <= 0) return stats;
+  const day = (stats.days[dayKey(now)] ??= emptyDay());
+  day.comments = (day.comments ?? 0) + page.comments;
+  day.pagesFlagged += 1;
+  return stats;
+}
+
 // ---------- storage ----------
 
 let queue: Promise<unknown> = Promise.resolve();
@@ -143,6 +155,10 @@ export function recordPage(page: {
   templateIds: TemplateId[];
 }): Promise<Stats> {
   return update((s) => applyPage(s, page));
+}
+
+export function recordComments(page: { comments: number }): Promise<Stats> {
+  return update((s) => applyComments(s, page));
 }
 
 // ---------- summary ----------
@@ -190,7 +206,7 @@ export function summarize(stats: Stats, range: StatsRange, now: Date = new Date(
   }
 
   const days = sumDays(stats, from, range === 'week' ? addDays(thisWeek, 6) : today);
-  const totals = { dimmed: 0, pagesHigh: 0, paragraphs: 0, pagesFlagged: 0 };
+  const totals = { dimmed: 0, pagesHigh: 0, paragraphs: 0, pagesFlagged: 0, comments: 0 };
   const reasonCounts: Record<string, number> = {};
   const domains: Record<string, DomainStats> = {};
   for (const d of days) {
@@ -198,6 +214,7 @@ export function summarize(stats: Stats, range: StatsRange, now: Date = new Date(
     totals.pagesHigh += d.pagesHigh;
     totals.paragraphs += d.paragraphs;
     totals.pagesFlagged += d.pagesFlagged;
+    totals.comments += d.comments ?? 0;
     for (const [t, n] of Object.entries(d.reasons)) reasonCounts[t] = (reasonCounts[t] ?? 0) + n;
     for (const [dom, ds] of Object.entries(d.domains)) {
       const acc = (domains[dom] ??= { count: 0, reasons: {} });

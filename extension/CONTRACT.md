@@ -98,3 +98,36 @@ Offscreen doc: `src/engine/offscreen.html`, reasons ['WORKERS'].
 
 ## UI in pages
 Everything injected lives in Shadow DOM roots. Fonts in shadow DOM: register via `new FontFace('UnslopInter', 'url(chrome-extension://.../x.woff2)')` + document.fonts.add (font files in web_accessible_resources).
+
+## Comment copies (checks/commentCopies/, content/copies/, content/youtube/, content/reddit/, background/commentCopies.ts, ui/commentFlag.ts)
+Flags each comment or reply that is repeated elsewhere on the same YouTube video or Reddit thread, with how many times it
+appears ("Repeated 15 times", or "AMS39K in 5 comments" for a shared promoted name). Covers the whole page, not just loaded comments.
+Separate from `combine` and the page/search verdicts. Shares the popup's switches: `Settings.mode` dims the flagged
+comment's text or hides it behind a "Show comment" link; `Settings.sensitivity` relaxed = exact copies / shared names of 3+,
+balanced = groups of 2+, strict = groups of 2+ with near-copy threshold 0.5. Stats: `DayStats.comments` (repeated comments
+flagged) and one `pagesFlagged` per video / thread with repeats, recorded once per tab (`recordComments`); the popup's
+"results flagged" tile = dimmed results + comments. Toolbar badge shows the repeated-comment count on YouTube / Reddit.
+`content/copies/controller.ts` is site-agnostic; a `CopiesSite` (youtube/site.ts, reddit/site.ts) gives page id, fetching
+and flag placement (`FlagSite`). To add a site, write one and pick it in `content/index.ts`.
+- **Reddit** (`config.commentCopies.reddit`; TODO(hack): not yet checked on live Reddit): Reddit's own JSON from the page's
+  origin, no key: `/comments/<id>.json` (tree, ~500), `/api/morechildren.json` (100 placeholders per call),
+  `/comments/<id>/_/<commentId>.json` ("continue this thread"). 2 requests at once, waits out `x-ratelimit-reset` on 429.
+  Ids are fullnames (`t1_abc`), matched to `shreddit-comment[thingid]` (pill in `[slot="commentMeta"]`) or old Reddit's
+  `.thing.comment[data-fullname]` (pill in `.tagline`). `[deleted]`/`[removed]` bodies are skipped.
+
+YouTube details:
+- **Loading:** content script, YouTube watch pages only, follows in-app navigation (`yt-navigate-finish` + URL poll).
+  1. If the user saved a YouTube Data API key (options page, `chrome.storage.local` `ytApiKey`; not part of `Settings`,
+     never broadcast), the SW fetches through `googleapis.com/youtube/v3` (100 per page; `host_permissions`).
+  2. Otherwise, or if the API fails (quota, comments off), the content script uses YouTube's own `/youtubei/v1/next`
+     requests (same origin, 20 per page): top-level pages in "Newest first" order (the default "Top comments" order
+     stops after a few hundred), reply threads 8 at a time alongside. No fixed delay; shared back-off on 429/5xx.
+     Undocumented interface, can break when YouTube changes.
+  Hidden developer toggle `ytUseApi` (options page: click the "YouTube comments" heading 5 times) forces step 2.
+- **Grouping** (`group.ts`, runs in the SW over port `'comment-copies'`, messages in `messages.ts`): exact copies after
+  normalising; near copies (word-set Jaccard >= 0.6, 5+ meaningful words, candidates from shared uncommon words);
+  campaigns (a letters+digits name or $TICKER from 3+ accounts). Quick capped passes while loading, full pass at the end.
+- **Measured** (2026-11-15, 11,380-comment video): 39 s page requests, 15 s with a key (548 API calls of 10,000/day);
+  ~5,700 comments in ~1,060 groups; one page freeze over 200 ms during the scan.
+- **Config:** `config.commentCopies`. **Wording:** describes what was seen ("appears 15 times on this video, from 14 accounts"),
+  never intent. Not yet reviewed by Toby.
