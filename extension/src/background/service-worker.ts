@@ -73,6 +73,8 @@ async function setSettings(patch: Partial<Settings>): Promise<Settings> {
   const next: Settings = { ...(await getSettings()), ...patch };
   next.disabledSites = Array.from(new Set((next.disabledSites ?? []).map((s) => s.toLowerCase())));
   next.markedSites = Array.from(new Set((next.markedSites ?? []).map((s) => s.toLowerCase())));
+  next.trustedSites = Array.from(new Set((next.trustedSites ?? []).map((s) => s.toLowerCase())));
+  if (!['relaxed', 'balanced', 'strict'].includes(next.sensitivity)) next.sensitivity = 'balanced';
   settingsCache = next;
   await chrome.storage.local.set({ [SETTINGS_KEY]: next });
   broadcastSettings(next);
@@ -168,6 +170,10 @@ function isUserMarked(settings: Settings, domain: string): boolean {
   const d = domain.toLowerCase();
   return (settings.markedSites ?? []).some((s) => d === s || d.endsWith('.' + s));
 }
+function isUserTrusted(settings: Settings, domain: string): boolean {
+  const d = domain.toLowerCase();
+  return (settings.trustedSites ?? []).some((s) => d === s || d.endsWith('.' + s));
+}
 function userMarkEvidence(settings: Settings, domain: string): Evidence[] {
   return isUserMarked(settings, domain)
     ? [{ checkId: 'siteList', score: 1, confidence: 'high', reasons: [{ templateId: 'siteList.user' }] }]
@@ -176,7 +182,7 @@ function userMarkEvidence(settings: Settings, domain: string): Evidence[] {
 
 async function checkResult(input: PageInput, settings: Settings): Promise<ResultVerdict> {
   const none: ResultVerdict = { flagged: false, level: null, reasons: [] };
-  if (!input.domain || isSiteDisabled(settings, input.domain)) return none;
+  if (!input.domain || isSiteDisabled(settings, input.domain) || isUserTrusted(settings, input.domain)) return none;
   const marked = userMarkEvidence(settings, input.domain);
   if (!marked.length && isAllowlisted(input.domain)) return none;
   const evidence = [...(await runWorkerChecks(input)), ...marked];
@@ -326,11 +332,14 @@ interface PendingPage {
 const pending = new Map<string, PendingPage>();
 let reqCounter = 0;
 
-function buildVerdict(input: PageInput, evidence: Evidence[], done: boolean): PageVerdict {
+function buildVerdict(input: PageInput, allEvidence: Evidence[], done: boolean): PageVerdict {
+  // Sensitivity (popup): relaxed = ignore the text check; balanced = outlines only when the page is
+  // Medium/High (plain human text such as Wikipedia got outlined at Low); strict = outline whenever
+  // the text check flagged enough paragraphs, whatever the page level.
+  const sensitivity = settingsCache?.sensitivity ?? 'balanced';
+  const evidence = sensitivity === 'relaxed' ? allEvidence.filter((e) => e.checkId !== 'text') : allEvidence;
   const c = combine(evidence);
-  // Outlines (and text-check reasons) only when the whole page is Medium or High (Toby, 2026-11-14):
-  // plain human text such as Wikipedia articles got paragraphs outlined at level Low.
-  const showText = c.level === 'medium' || c.level === 'high';
+  const showText = sensitivity === 'strict' || c.level === 'medium' || c.level === 'high';
   const spans: SpanFlag[] = showText
     ? evidence.flatMap((e) => e.spans ?? []).sort((a, b) => a.chunkIndex - b.chunkIndex)
     : [];
@@ -390,7 +399,12 @@ async function handlePageCheck(port: chrome.runtime.Port, input: PageInput): Pro
   const settings = await getSettings();
 
   const marked = input.domain ? userMarkEvidence(settings, input.domain) : [];
-  if (!input.domain || (!marked.length && isAllowlisted(input.domain)) || isSiteDisabled(settings, input.domain)) {
+  if (
+    !input.domain ||
+    (!marked.length && isAllowlisted(input.domain)) ||
+    isSiteDisabled(settings, input.domain) ||
+    isUserTrusted(settings, input.domain)
+  ) {
     post(port, emptyPageVerdict({ chunkCount: input.chunks?.length ?? 0 }));
     if (tabId !== undefined) {
       await setTabState(tabId, {
@@ -555,9 +569,37 @@ async function openPopup(tabId: number | undefined): Promise<{ ok: boolean }> {
 
 // ---------------------------------------------------------------- lifecycle
 
+// Right-click menu: mark or trust the page's (or link's) site. Local only.
+const MENU_MARK = 'unslop-mark';
+const MENU_TRUST = 'unslop-trust';
+function createMenus(): void {
+  chrome.contextMenus.removeAll(() => {
+    chrome.contextMenus.create({ id: MENU_MARK, title: 'Mark site as slop', contexts: ['page', 'link'] });
+    chrome.contextMenus.create({ id: MENU_TRUST, title: 'Trust this site (never flag it)', contexts: ['page', 'link'] });
+  });
+}
+chrome.contextMenus.onClicked.addListener((info, tab) => {
+  const raw = info.linkUrl || info.pageUrl || tab?.url || '';
+  let domain = '';
+  try {
+    domain = registrableDomain(new URL(resolveUrl(raw)).hostname);
+  } catch {
+    return;
+  }
+  if (!domain) return;
+  void (async () => {
+    const s = await getSettings();
+    const marked = (s.markedSites ?? []).filter((d) => d !== domain);
+    const trusted = (s.trustedSites ?? []).filter((d) => d !== domain);
+    if (info.menuItemId === MENU_MARK) await setSettings({ markedSites: [...marked, domain], trustedSites: trusted });
+    if (info.menuItemId === MENU_TRUST) await setSettings({ trustedSites: [...trusted, domain], markedSites: marked });
+  })();
+});
+
 chrome.runtime.onInstalled.addListener(() => {
   initWorkerChecks();
   warmup();
+  createMenus();
 });
 chrome.runtime.onStartup.addListener(() => {
   initWorkerChecks();

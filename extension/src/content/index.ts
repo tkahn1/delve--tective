@@ -38,7 +38,15 @@ async function main() {
   const kind: 'search' | 'page' = engine ? 'search' : 'page';
 
   let controller: Controller | null = null;
+  let listsKey = '';
   const apply = (s: Settings) => {
+    // Marking/trusting a site or changing sensitivity changes verdicts: start the check again.
+    const key = JSON.stringify([s.markedSites, s.trustedSites, s.sensitivity]);
+    if (controller && listsKey && key !== listsKey) {
+      controller.destroy();
+      controller = null;
+    }
+    listsKey = key;
     const active = s.enabled && !siteDisabled(s, domain, hostname);
     if (!active) {
       controller?.destroy();

@@ -82,6 +82,7 @@ export default defineConfig({
       input: {
         offscreen: resolve(root, 'src/engine/offscreen.html'),
         report: resolve(root, 'src/report/index.html'),
+        options: resolve(root, 'src/options/index.html'),
         bench: resolve(root, 'bench/bench.html'),
       },
     },

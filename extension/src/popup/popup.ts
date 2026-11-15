@@ -5,7 +5,7 @@ import '@fontsource/space-grotesk/600.css';
 import '@fontsource/space-grotesk/700.css';
 import './popup.css';
 
-import type { Settings, TabState } from '../engine/messages';
+import { DEFAULT_SETTINGS, type Settings, type TabState } from '../engine/messages';
 import type { Level, ReasonRef } from '../checks/types';
 import { fillReason, capitalize } from '../reasons/templates';
 import { summarize, type Stats } from '../storage/stats';
@@ -16,7 +16,7 @@ const $ = <T extends HTMLElement = HTMLElement>(id: string): T => document.getEl
 
 const LEVEL_LABEL: Record<Level, string> = { low: 'Low', medium: 'Medium', high: 'High' };
 
-let settings: Settings = { enabled: true, mode: 'dim', disabledSites: [], markedSites: [] };
+let settings: Settings = { ...DEFAULT_SETTINGS };
 let siteDomain = '';
 let activeTabId: number | undefined;
 
@@ -84,7 +84,7 @@ function renderPage(state: TabState | null): void {
 
 function renderSettings(): void {
   ($('enabled') as HTMLInputElement).checked = settings.enabled;
-  document.querySelectorAll<HTMLButtonElement>('.segmented button').forEach((b) => {
+  document.querySelectorAll<HTMLButtonElement>('.segmented button[data-mode]').forEach((b) => {
     const on = b.dataset.mode === settings.mode;
     b.classList.toggle('active', on);
     b.setAttribute('aria-checked', String(on));
@@ -101,7 +101,17 @@ function renderSettings(): void {
     btn.textContent = marked ? 'Unmark' : 'Mark as slop';
     btn.setAttribute('aria-pressed', String(marked));
     btn.setAttribute('aria-label', marked ? `Unmark ${siteDomain}` : `Mark ${siteDomain} as slop for you`);
+    const trusted = (settings.trustedSites ?? []).includes(siteDomain);
+    const tbtn = $('trust-site') as HTMLButtonElement;
+    tbtn.textContent = trusted ? 'Untrust' : 'Not slop';
+    tbtn.setAttribute('aria-pressed', String(trusted));
+    tbtn.setAttribute('aria-label', trusted ? `Stop trusting ${siteDomain}` : `Trust ${siteDomain}: never flag it for you`);
   }
+  document.querySelectorAll<HTMLButtonElement>('.segmented button[data-sens]').forEach((b) => {
+    const on = b.dataset.sens === (settings.sensitivity ?? 'balanced');
+    b.classList.toggle('active', on);
+    b.setAttribute('aria-checked', String(on));
+  });
   document.body.classList.toggle('off', !settings.enabled);
 }
 
@@ -146,7 +156,13 @@ async function init(): Promise<void> {
   $('enabled').addEventListener('change', (e) => {
     void setSettings({ enabled: (e.target as HTMLInputElement).checked });
   });
-  document.querySelectorAll<HTMLButtonElement>('.segmented button').forEach((b) => {
+  document.querySelectorAll<HTMLButtonElement>('.segmented button[data-sens]').forEach((b) => {
+    b.addEventListener('click', () => {
+      const sensitivity = b.dataset.sens as Settings['sensitivity'];
+      if (sensitivity !== settings.sensitivity) void setSettings({ sensitivity });
+    });
+  });
+  document.querySelectorAll<HTMLButtonElement>('.segmented button[data-mode]').forEach((b) => {
     b.addEventListener('click', () => {
       const mode = b.dataset.mode as Settings['mode'];
       if (mode !== settings.mode) void setSettings({ mode });
@@ -162,7 +178,19 @@ async function init(): Promise<void> {
     if (!siteDomain) return;
     const list = settings.markedSites ?? [];
     const marked = list.includes(siteDomain);
-    void setSettings({ markedSites: marked ? list.filter((d) => d !== siteDomain) : [...list, siteDomain] });
+    const trusted = (settings.trustedSites ?? []).filter((d) => d !== siteDomain);
+    void setSettings({ markedSites: marked ? list.filter((d) => d !== siteDomain) : [...list, siteDomain], trustedSites: trusted });
+  });
+  $('trust-site').addEventListener('click', () => {
+    if (!siteDomain) return;
+    const list = settings.trustedSites ?? [];
+    const trusted = list.includes(siteDomain);
+    const marked = (settings.markedSites ?? []).filter((d) => d !== siteDomain);
+    void setSettings({ trustedSites: trusted ? list.filter((d) => d !== siteDomain) : [...list, siteDomain], markedSites: marked });
+  });
+  $('manage-link').addEventListener('click', () => {
+    void chrome.runtime.openOptionsPage();
+    window.close();
   });
   $('report-link').addEventListener('click', () => {
     void chrome.tabs.create({ url: chrome.runtime.getURL('src/report/index.html') });

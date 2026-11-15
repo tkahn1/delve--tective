@@ -31,7 +31,8 @@ export default defineManifest({
       all_frames: false,
     },
   ],
-  permissions: ['storage', 'offscreen', 'tabs', 'activeTab'],
+  permissions: ['storage', 'offscreen', 'tabs', 'activeTab', 'contextMenus'],
+  options_page: 'src/options/index.html',
   content_security_policy: {
     extension_pages: "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'",
   },

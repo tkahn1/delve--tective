@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Unslop: my sites</title>
+  </head>
+  <body>
+    <main class="opts">
+      <h1>My sites</h1>
+      <p class="sub">Your own lists. They are stored on this device only and never sent anywhere.</p>
+      <section>
+        <h2>Marked as slop</h2>
+        <p class="hint">Always flagged for you, even if no check fires.</p>
+        <ul id="marked" class="list"></ul>
+      </section>
+      <section>
+        <h2>Trusted</h2>
+        <p class="hint">Never flagged for you, even if a check fires.</p>
+        <ul id="trusted" class="list"></ul>
+      </section>
+      <p class="hint">Add sites from the Unslop popup, or right-click any page or link.</p>
+    </main>
+    <script type="module" src="./options.ts"></script>
+  </body>
+</html>

@@ -1,0 +1,11 @@
+body { margin: 0; background: #FFFFFF; color: #18181B; font-family: Inter, system-ui, sans-serif; }
+.opts { max-width: 640px; margin: 0 auto; padding: 40px 16px; }
+h1 { font-size: 28px; margin: 0 0 8px; }
+h2 { font-size: 16px; margin: 28px 0 4px; }
+.sub, .hint { color: #52525B; font-size: 14px; margin: 0 0 8px; }
+.list { list-style: none; padding: 0; margin: 8px 0 0; border: 1px solid #E4E4E7; border-radius: 12px; }
+.list li { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; border-top: 1px solid #F4F4F5; font-size: 14px; }
+.list li:first-child { border-top: 0; }
+.list li.empty { color: #52525B; }
+.list button { font: inherit; font-size: 13px; color: #1D4ED8; background: none; border: 0; cursor: pointer; min-height: 32px; padding: 0 8px; }
+.list button:focus-visible { outline: 2px solid #1D4ED8; border-radius: 6px; }

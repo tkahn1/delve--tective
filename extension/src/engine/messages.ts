@@ -12,9 +12,13 @@ export interface Settings {
   disabledSites: string[];
   /** Sites the user marked as slop themselves (registrable domains). Local only, never sent. */
   markedSites: string[];
+  /** Sites the user trusts: never flagged for them. Local only. */
+  trustedSites: string[];
+  /** How readily pages get outlined. 'balanced' = default behaviour. */
+  sensitivity: 'relaxed' | 'balanced' | 'strict';
 }
 
-export const DEFAULT_SETTINGS: Settings = { enabled: true, mode: 'dim', disabledSites: [], markedSites: [] };
+export const DEFAULT_SETTINGS: Settings = { enabled: true, mode: 'dim', disabledSites: [], markedSites: [], trustedSites: [], sensitivity: 'balanced' };
 
 export interface ResultVerdict {
   flagged: boolean;

@@ -34,12 +34,23 @@
             <div class="site-title" id="site-title"></div>
             <div class="helper">Turn off to skip this site</div>
           </div>
+          <button type="button" id="trust-site" class="mark-site trust">Not slop</button>
           <button type="button" id="mark-site" class="mark-site">Mark as slop</button>
           <label class="switch">
             <input type="checkbox" id="site-enabled" role="switch" />
             <span class="track"><span class="thumb"></span></span>
           </label>
         </div>
+      </section>
+
+      <section class="section">
+        <div class="field-title">Sensitivity</div>
+        <div class="segmented three" role="radiogroup" aria-label="Sensitivity">
+          <button type="button" role="radio" data-sens="relaxed">Relaxed</button>
+          <button type="button" role="radio" data-sens="balanced">Balanced</button>
+          <button type="button" role="radio" data-sens="strict">Strict</button>
+        </div>
+        <div class="helper sens-help">Relaxed: only listed sites. Strict: outline suspect paragraphs on any page.</div>
       </section>
 
       <section class="section counts">
@@ -52,6 +63,14 @@
           <div class="count-label">pages flagged this week</div>
         </div>
       </section>
+
+      <button type="button" class="section row link-row" id="manage-link">
+        <span>
+          <span class="link-title">My sites</span>
+          <span class="helper">Sites you marked or trust</span>
+        </span>
+        <span class="chevron">›</span>
+      </button>
 
       <button type="button" class="section row link-row" id="report-link">
         <span>
