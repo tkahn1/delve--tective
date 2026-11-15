@@ -69,7 +69,10 @@ async function main() {
       copies = null;
       return;
     }
-    if (copiesSite && !copies) copies = startCommentCopies(copiesSite);
+    if (copiesSite) {
+      if (copies) copies.update(s);
+      else copies = startCommentCopies(copiesSite, s);
+    }
     if (controller) controller.update(s);
     else controller = kind === 'search' ? startSearch(url, s, engine ?? 'google') : startPage(url, domain, s);
   };

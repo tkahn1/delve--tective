@@ -8,6 +8,8 @@ import { groupComments } from '../checks/commentCopies/group';
 import { COMMENT_COPIES_PORT, YT_STORAGE, copiesStatusKey, type CopiesRequest, type CopiesResponse } from '../checks/commentCopies/messages';
 import type { VideoComment } from '../checks/commentCopies/types';
 import { config } from '../config/detectors.config';
+import { recordComments } from '../storage/stats';
+import type { CopiesStatus } from '../checks/commentCopies/messages';
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 type Json = Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -124,7 +126,16 @@ async function apiScan(ctx: TabCtx, run: number, videoId: string): Promise<void>
   else send({ status: 'done', calls });
 }
 
-export function registerCommentCopies(): void {
+/** Weekly counts: each video / thread is recorded once per tab, when its scan finishes with repeats. */
+async function recordOnce(tabId: number, st: CopiesStatus): Promise<void> {
+  if (st.phase !== 'done' || st.repeats <= 0) return;
+  const key = `copiesRec:${tabId}:${st.site}:${st.pageId}`;
+  if ((await chrome.storage.session.get(key))[key]) return;
+  await chrome.storage.session.set({ [key]: true });
+  await recordComments({ comments: st.repeats });
+}
+
+export function registerCommentCopies(opts: { onStatus?(tabId: number, status: CopiesStatus | null): void } = {}): void {
   chrome.runtime.onConnect.addListener((port) => {
     if (port.name !== COMMENT_COPIES_PORT) return;
     const ctx: TabCtx = { port, run: null, apiRun: null, comments: [] };
@@ -132,14 +143,20 @@ export function registerCommentCopies(): void {
     port.onDisconnect.addListener(() => {
       ctx.apiRun = null;
       ctx.comments = [];
-      if (tabId != null) void chrome.storage.session.remove(copiesStatusKey(tabId)).catch(() => {});
+      if (tabId != null) {
+        void chrome.storage.session.remove(copiesStatusKey(tabId)).catch(() => {});
+        opts.onStatus?.(tabId, null);
+      }
     });
     port.onMessage.addListener((msg: CopiesRequest) => {
       switch (msg?.type) {
         case 'copies/status': // for the popup
           if (tabId == null) break;
-          if (msg.status) void chrome.storage.session.set({ [copiesStatusKey(tabId)]: msg.status }).catch(() => {});
-          else void chrome.storage.session.remove(copiesStatusKey(tabId)).catch(() => {});
+          if (msg.status) {
+            void chrome.storage.session.set({ [copiesStatusKey(tabId)]: msg.status }).catch(() => {});
+            void recordOnce(tabId, msg.status).catch(() => {});
+          } else void chrome.storage.session.remove(copiesStatusKey(tabId)).catch(() => {});
+          opts.onStatus?.(tabId, msg.status);
           break;
         case 'copies/reset': // new video
           ctx.run = msg.run;
@@ -159,7 +176,7 @@ export function registerCommentCopies(): void {
           const t = performance.now();
           const groups = groupComments(ctx.comments, {
             minChars: cfg.minChars,
-            nearThreshold: cfg.nearThreshold,
+            nearThreshold: msg.nearThreshold ?? cfg.nearThreshold,
             nearMinWords: cfg.nearMinWords,
             campaignMin: cfg.campaignMin,
             // Quick capped passes while the scan runs, one full pass at the end.

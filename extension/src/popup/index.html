@@ -21,20 +21,20 @@
       <section class="section" id="this-page">
         <div class="label">This page</div>
         <div id="page-body"></div>
-      </section>
-
-      <section class="section" id="copies" hidden>
-        <div class="label">Repeated comments</div>
-        <p class="copies-head" id="copies-head"></p>
-        <p class="muted" id="copies-sub"></p>
+        <div class="copies" id="copies" hidden>
+          <div class="copies-label">Comments</div>
+          <p class="copies-head" id="copies-head"></p>
+          <p class="muted copies-sub" id="copies-sub"></p>
+        </div>
       </section>
 
       <section class="section">
-        <div class="field-title">Flagged search results</div>
-        <div class="segmented" role="radiogroup" aria-label="Flagged search results">
+        <div class="field-title">Flagged results</div>
+        <div class="segmented" role="radiogroup" aria-label="Flagged results: search results and repeated comments">
           <button type="button" role="radio" data-mode="dim">Dim</button>
           <button type="button" role="radio" data-mode="hide">Hide</button>
         </div>
+        <div class="helper mode-help">Search results and repeated comments.</div>
         <div class="row site-row" id="site-row" hidden>
           <div class="site-text">
             <div class="site-title" id="site-title"></div>
@@ -56,13 +56,13 @@
           <button type="button" role="radio" data-sens="balanced">Balanced</button>
           <button type="button" role="radio" data-sens="strict">Strict</button>
         </div>
-        <div class="helper sens-help">Relaxed: only listed sites. Strict: outline suspect paragraphs on any page.</div>
+        <div class="helper sens-help">Relaxed: only listed sites, and comments repeated 3+ times word for word. Strict: outline suspect paragraphs on any page, and match comments more loosely.</div>
       </section>
 
       <section class="section counts">
         <div class="count">
           <div class="big" id="count-dimmed">0</div>
-          <div class="count-label">results dimmed this week</div>
+          <div class="count-label">results flagged this week</div>
         </div>
         <div class="count">
           <div class="big" id="count-pages">0</div>

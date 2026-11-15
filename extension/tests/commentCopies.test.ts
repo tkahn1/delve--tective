@@ -128,3 +128,28 @@ describe('reddit collect', () => {
     expect(d.detail).toBe('The same comment appears 2 times in this thread, from 2 accounts.');
   });
 });
+
+describe('sensitivity for comments', () => {
+  it('relaxed keeps exact copies and shared names of 3+, balanced and strict keep 2+', async () => {
+    const { keepGroup } = await import('../src/content/copies/controller');
+    const g = (kind: 'exact' | 'near' | 'campaign', n: number) => ({ kind, label: kind === 'campaign' ? 'X1' : null, ids: Array.from({ length: n }, (_, i) => `i${i}`), authors: n });
+    expect(keepGroup(g('exact', 2), 'relaxed')).toBe(false);
+    expect(keepGroup(g('exact', 3), 'relaxed')).toBe(true);
+    expect(keepGroup(g('near', 9), 'relaxed')).toBe(false);
+    expect(keepGroup(g('campaign', 3), 'relaxed')).toBe(true);
+    expect(keepGroup(g('near', 2), 'balanced')).toBe(true);
+    expect(keepGroup(g('near', 2), 'strict')).toBe(true);
+  });
+});
+
+describe('weekly counts', () => {
+  it('a video with repeated comments counts its comments and one flagged page', async () => {
+    const { applyComments, summarize } = await import('../src/storage/stats');
+    const now = new Date(2026, 10, 15);
+    let s = applyComments({ days: {} }, { comments: 230 }, now);
+    s = applyComments(s, { comments: 0 }, now); // nothing repeated: not counted
+    const t = summarize(s, 'week', now).totals;
+    expect(t.comments).toBe(230);
+    expect(t.pagesFlagged).toBe(1);
+  });
+});

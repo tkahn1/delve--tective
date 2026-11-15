@@ -101,6 +101,9 @@ export const COMMENT_FLAG_CSS = `
   white-space: nowrap; cursor: help; }
 .flag .dot { width: 6px; height: 6px; border-radius: 50%; background: ${C.flag}; flex: none; }
 .flag b { font-family: ${FONT_HEAD}; font-weight: 600; }
+.show { margin-left: 8px; font-size: 11.5px; font-weight: 500; color: ${C.link}; text-decoration: underline;
+  text-underline-offset: 2px; border-radius: 6px; }
+.show[hidden] { display: none; }
 `;
 
 export const COPY_TIP_CSS = `

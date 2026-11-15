@@ -2,7 +2,7 @@
 // pill after the author line ("Repeated 15 times"), with a dark hover box that says what was seen. Each
 // pill lives in its own shadow root, so the site's CSS can't reach it. Where it goes is up to a FlagSite.
 import type { CopyGroup } from '../checks/commentCopies/types';
-import { createShadowHost, h } from './shadow';
+import { createShadowHost, ensurePageStyle, h } from './shadow';
 import { COMMENT_FLAG_CSS, COPY_TIP_CSS } from './styles';
 
 const HOST_ATTR = 'data-unslop-copies';
@@ -19,7 +19,12 @@ export interface FlagSite {
   idOf(node: Element): string | null;
   /** Element the pill is appended to (this comment's own header, not a nested reply's). */
   headerOf(node: Element): Element | null;
+  /** This comment's own text (dimmed or hidden with the "Flagged results" setting). */
+  bodyOf(node: Element): Element | null;
 }
+
+/** Same setting as search results: dim the flagged comment's text, or hide it behind a Show link. */
+export type FlagMode = 'dim' | 'hide';
 
 export interface FlagCopy {
   title: string;
@@ -94,38 +99,49 @@ export interface FlagStats {
 }
 
 export interface CommentFlags {
-  /** Flag every comment on screen whose id is in a group of at least minCount. Call again as groups change. */
+  /** Flag every comment on screen whose id is in byId. Call again as groups change. */
   update(byId: Map<string, CopyGroup>): void;
+  setMode(mode: FlagMode): void;
   stats(): FlagStats;
   clear(): void;
   destroy(): void;
 }
 
-export function createCommentFlags(site: FlagSite, minCount: number): CommentFlags {
+export function createCommentFlags(site: FlagSite, initialMode: FlagMode): CommentFlags {
   const tip = createTip();
+  ensurePageStyle(); // [data-unslop-dim] / [data-unslop-hidden] rules, shared with search results
   let byId = new Map<string, CopyGroup>();
+  let mode: FlagMode = initialMode;
+  const revealed = new Set<string>(); // hidden comments the user chose to show
   const copyFor = new WeakMap<HTMLElement, FlagCopy>();
 
-  const fill = (host: HTMLElement, copy: FlagCopy) => {
+  const fill = (host: HTMLElement, copy: FlagCopy, hidden: boolean) => {
     copyFor.set(host, copy);
     const pill = host.shadowRoot!.querySelector('.flag')!;
     pill.textContent = '';
     pill.append(h('span', { class: 'dot', 'aria-hidden': 'true' }), copy.pill.lead, h('b', {}, copy.pill.count), copy.pill.tail);
     pill.setAttribute('aria-label', `${copy.title}. ${copy.detail}`);
-    host.dataset.key = copy.detail;
+    host.shadowRoot!.querySelector<HTMLElement>('.show')!.hidden = !hidden;
+    host.dataset.key = `${copy.detail}|${hidden}`;
   };
 
-  const makeHost = (copy: FlagCopy): HTMLElement => {
+  const makeHost = (copy: FlagCopy, id: string, hidden: boolean): HTMLElement => {
     const sh = createShadowHost(COMMENT_FLAG_CSS, 'display:inline-block;vertical-align:middle;margin-left:8px;');
     sh.host.setAttribute(HOST_ATTR, '');
     const pill = h('span', { class: 'u flag', tabindex: '0' });
-    sh.root.appendChild(pill);
-    const show = () => tip.show(pill, copyFor.get(sh.host)!);
-    pill.addEventListener('mouseenter', show);
-    pill.addEventListener('focus', show);
+    const show = h('button', { class: 'u show', type: 'button', hidden: '' }, 'Show comment');
+    show.addEventListener('click', (e) => {
+      e.stopPropagation();
+      revealed.add(id);
+      applyAll();
+    });
+    sh.root.append(pill, show);
+    const showTip = () => tip.show(pill, copyFor.get(sh.host)!);
+    pill.addEventListener('mouseenter', showTip);
+    pill.addEventListener('focus', showTip);
     pill.addEventListener('mouseleave', () => tip.hideSoon());
     pill.addEventListener('blur', () => tip.hideSoon());
-    fill(sh.host, copy);
+    fill(sh.host, copy, hidden);
     return sh.host;
   };
 
@@ -137,8 +153,14 @@ export function createCommentFlags(site: FlagSite, minCount: number): CommentFla
       const id = site.idOf(node);
       if (id) st.withId++;
       const g = id ? byId.get(id) : undefined;
-      const want = !!g && g.ids.length >= minCount;
+      const want = !!g;
       if (want) st.inGroups++;
+      const body = site.bodyOf(node);
+      const hidden = want && mode === 'hide' && !revealed.has(id!);
+      if (body) {
+        body.toggleAttribute('data-unslop-dim', want && mode === 'dim');
+        body.toggleAttribute('data-unslop-hidden', hidden);
+      }
       const header = site.headerOf(node);
       if (!header) {
         if (want) st.noHeader++;
@@ -151,8 +173,8 @@ export function createCommentFlags(site: FlagSite, minCount: number): CommentFla
       }
       const copy = describe(g!, site.where);
       if (existing) {
-        if (existing.dataset.key !== copy.detail) fill(existing, copy);
-      } else header.appendChild(makeHost(copy));
+        if (existing.dataset.key !== `${copy.detail}|${hidden}`) fill(existing, copy, hidden);
+      } else header.appendChild(makeHost(copy, id!, hidden));
       st.flagged++;
     }
     last = st;
@@ -174,9 +196,20 @@ export function createCommentFlags(site: FlagSite, minCount: number): CommentFla
       applyAll();
     },
     stats: () => last,
+    setMode(next) {
+      if (next === mode) return;
+      mode = next;
+      applyAll();
+    },
     clear() {
       byId = new Map();
+      revealed.clear();
       document.querySelectorAll(`[${HOST_ATTR}]`).forEach((e) => e.remove());
+      for (const node of site.nodes()) {
+        const body = site.bodyOf(node);
+        body?.removeAttribute('data-unslop-dim');
+        body?.removeAttribute('data-unslop-hidden');
+      }
     },
     destroy() {
       observer.disconnect();

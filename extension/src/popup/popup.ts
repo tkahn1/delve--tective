@@ -20,6 +20,8 @@ const LEVEL_LABEL: Record<Level, string> = { low: 'Low', medium: 'Medium', high:
 let settings: Settings = { ...DEFAULT_SETTINGS };
 let siteDomain = '';
 let activeTabId: number | undefined;
+let lastState: TabState | null = null;
+let lastCopies: CopiesStatus | null = null;
 
 function send<T>(msg: unknown): Promise<T | null> {
   return chrome.runtime.sendMessage(msg).then(
@@ -75,7 +77,8 @@ function renderPage(state: TabState | null): void {
   }
 
   if (!state) {
-    body.appendChild(el('p', 'muted', 'No page check available. Refresh the page to try again.'));
+    // On YouTube / Reddit the comments result below stands in for the page result.
+    if (!lastCopies) body.appendChild(el('p', 'muted', 'No page check available. Refresh the page to try again.'));
     return;
   }
   if (!state.level || state.level === 'low' && !state.reasons.length) {
@@ -132,14 +135,17 @@ async function setSettings(patch: Partial<Settings>): Promise<void> {
 async function refreshPage(): Promise<void> {
   const state = activeTabId != null ? await send<TabState>({ type: 'tab/state', tabId: activeTabId }) : null;
   if (state?.domain) siteDomain = state.domain;
+  lastState = state;
   renderSettings();
   renderPage(state);
+  renderCopies(lastCopies); // its wording follows Dim/Hide
 }
 
 async function refreshStats(): Promise<void> {
   const stats = await send<Stats>({ type: 'stats/get' });
-  const totals = stats ? summarize(stats, 'week').totals : { dimmed: 0, pagesFlagged: 0 };
-  $('count-dimmed').textContent = String(totals.dimmed);
+  const totals = stats ? summarize(stats, 'week').totals : { dimmed: 0, pagesFlagged: 0, comments: 0 };
+  // "Flagged results": dimmed search results plus repeated comments. Pages include videos / threads with repeats.
+  $('count-dimmed').textContent = String(totals.dimmed + (totals.comments ?? 0));
   $('count-pages').textContent = String(totals.pagesFlagged);
 }
 
@@ -249,12 +255,15 @@ const NOTE_LABEL: Record<string, string> = { nokey: 'no key saved', disabled: 'o
 async function refreshCopies(): Promise<void> {
   const st = activeTabId == null ? null
     : ((await chrome.storage.session.get(copiesStatusKey(activeTabId)))[copiesStatusKey(activeTabId)] as CopiesStatus | undefined) ?? null;
+  const had = !!lastCopies;
+  lastCopies = st;
+  if (had !== !!st) renderPage(lastState); // "No page check available" only when there is no comments result either
   renderCopies(st);
 }
 
 function renderCopies(st: CopiesStatus | null): void {
   const section = $('copies');
-  section.hidden = !st;
+  section.hidden = !st || !settings.enabled;
   const metrics = $('copies-metrics');
   metrics.textContent = '';
   const row = (k: string, v: string, warn = false) => {
@@ -272,13 +281,16 @@ function renderCopies(st: CopiesStatus | null): void {
   // Summary
   const head = $('copies-head');
   head.textContent = '';
+  // Same phrasing as search results ("3 of 10 results dimmed"), following Dim/Hide and Sensitivity.
+  const verb = settings.mode === 'hide' ? 'hidden' : 'dimmed';
   if (st.phase === 'stopped' && !loaded) head.append(`Couldn't load the comments on this ${where}`);
-  else if (st.inGroups) head.append(el('b', '', n(st.inGroups)), ` comments are repeats, in ${n(st.groups)} groups`);
+  else if (st.repeats) head.append(el('b', '', n(st.repeats)), ` repeated comments ${verb}`);
   else head.append(st.phase === 'loading' ? 'Checking comments…' : `No repeated comments on this ${where}`);
+  const groups = st.repeatGroups === 1 ? '1 group' : `${n(st.repeatGroups)} groups`;
   $('copies-sub').textContent =
     st.phase === 'stopped' && st.fetch.lastError ? st.fetch.lastError
-    : st.phase === 'loading' ? `${n(loaded)} comments loaded so far`
-    : `${n(loaded)} comments checked in ${Math.round(st.secs)} s`;
+    : st.phase === 'loading' ? `${st.repeats ? `${groups} so far · ` : ''}${n(loaded)} comments loaded`
+    : `${st.repeats ? `In ${groups} · ` : ''}${n(loaded)} comments checked in ${Math.round(st.secs)} s`;
 
   // Developer metrics
   row('Status', st.phase === 'loading' ? `loading, ${Math.round(st.secs)} s` : st.phase === 'done' ? `done in ${Math.round(st.secs)} s` : 'stopped', st.phase === 'stopped');
@@ -289,6 +301,7 @@ function renderCopies(st: CopiesStatus | null): void {
     !!st.fetch.lastStatus && st.fetch.lastStatus >= 400);
   if (st.fetch.lastError) row('Last error', st.fetch.lastError, true);
   row('Groups', `${n(st.groups)} (${n(st.inGroups)} comments, largest ${n(st.biggest)})`);
+  row('Flagged at sensitivity', `${n(st.repeatGroups)} groups, ${n(st.repeats)} comments (${settings.sensitivity ?? 'balanced'})`);
   row('Grouping', `${n(st.lastGroupMs)} ms last pass`);
   row('On the page', `${n(st.onPage)} comments, ${n(st.withId)} with ids`, st.onPage > 0 && st.withId === 0);
   row('Flags', `${n(st.flagged)} of ${n(st.inGroupsOnPage)} in groups` + (st.noHeader ? `, ${n(st.noHeader)} with no place` : ''),

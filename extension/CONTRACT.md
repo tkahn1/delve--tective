@@ -102,7 +102,11 @@ Everything injected lives in Shadow DOM roots. Fonts in shadow DOM: register via
 ## Comment copies (checks/commentCopies/, content/copies/, content/youtube/, content/reddit/, background/commentCopies.ts, ui/commentFlag.ts)
 Flags each comment or reply that is repeated elsewhere on the same YouTube video or Reddit thread, with how many times it
 appears ("Repeated 15 times", or "AMS39K in 5 comments" for a shared promoted name). Covers the whole page, not just loaded comments.
-Separate from `combine`, the page/search reports and stats: nothing recorded, in memory per tab only.
+Separate from `combine` and the page/search verdicts. Shares the popup's switches: `Settings.mode` dims the flagged
+comment's text or hides it behind a "Show comment" link; `Settings.sensitivity` relaxed = exact copies / shared names of 3+,
+balanced = groups of 2+, strict = groups of 2+ with near-copy threshold 0.5. Stats: `DayStats.comments` (repeated comments
+flagged) and one `pagesFlagged` per video / thread with repeats, recorded once per tab (`recordComments`); the popup's
+"results flagged" tile = dimmed results + comments. Toolbar badge shows the repeated-comment count on YouTube / Reddit.
 `content/copies/controller.ts` is site-agnostic; a `CopiesSite` (youtube/site.ts, reddit/site.ts) gives page id, fetching
 and flag placement (`FlagSite`). To add a site, write one and pick it in `content/index.ts`.
 - **Reddit** (`config.commentCopies.reddit`; TODO(hack): not yet checked on live Reddit): Reddit's own JSON from the page's

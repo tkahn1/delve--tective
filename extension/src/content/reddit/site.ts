@@ -70,5 +70,10 @@ export const redditSite: CopiesSite = {
     nodes: () => document.querySelectorAll(COMMENT_SEL),
     idOf,
     headerOf,
+    // Old Reddit: the comment's own text block. Current design: the slotted text, a direct child.
+    bodyOf: (node) =>
+      node.matches('.thing.comment')
+        ? node.querySelector(':scope > .entry .usertext-body')
+        : node.querySelector(':scope > [slot="comment"]'),
   },
 };

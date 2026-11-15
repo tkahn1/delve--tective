@@ -28,6 +28,8 @@ export interface CopiesStatus {
   replies: number;
   groups: number;
   inGroups: number; // loaded comments that belong to a repeat group
+  repeats: number; // ...that are flagged at the current sensitivity
+  repeatGroups: number;
   biggest: number; // size of the largest group
   onPage: number; // comment elements on the page
   withId: number;
@@ -44,7 +46,7 @@ export interface CopiesStatus {
 export type CopiesRequest =
   | { type: 'copies/reset'; run: number }
   | { type: 'copies/add'; run: number; comments: VideoComment[] }
-  | { type: 'copies/group'; run: number; final: boolean }
+  | { type: 'copies/group'; run: number; final: boolean; nearThreshold?: number }
   | { type: 'copies/apiScan'; run: number; videoId: string }
   | { type: 'copies/status'; status: CopiesStatus | null };
 

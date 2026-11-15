@@ -54,5 +54,6 @@ export const youtubeSite: CopiesSite = {
     idOf,
     // Each comment and reply has its own header; replies are siblings, not descendants, of their parent's header.
     headerOf: (node) => node.querySelector('#header-author'),
+    bodyOf: (node) => node.querySelector('#content-text')?.closest('#expander') ?? node.querySelector('#content-text'),
   },
 };

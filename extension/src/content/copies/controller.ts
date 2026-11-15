@@ -11,6 +11,7 @@ import {
 } from '../../checks/commentCopies/messages';
 import type { CopyGroup, VideoComment } from '../../checks/commentCopies/types';
 import { config } from '../../config/detectors.config';
+import type { Settings } from '../../engine/messages';
 import { createCommentFlags, type FlagSite } from '../../ui/commentFlag';
 import { createCopiesSummary, type SummaryPlacement } from '../../ui/copiesSummary';
 import type { Controller } from '../search';
@@ -50,9 +51,23 @@ interface Scan {
 
 const STATUS_EVERY_MS = 1000;
 
-export function startCommentCopies(site: CopiesSite): Controller {
+/**
+ * The popup's Sensitivity applies to comments too:
+ *  relaxed:  only exact copies and shared names, repeated 3+ times;
+ *  balanced: every group of 2+;
+ *  strict:   every group of 2+, with looser near-copy matching (shared words >= 50% instead of 60%).
+ */
+export function keepGroup(g: CopyGroup, sensitivity: Settings['sensitivity']): boolean {
+  if (sensitivity === 'relaxed') return g.kind !== 'near' && g.ids.length >= 3;
+  return g.ids.length >= config.commentCopies.minFlagCount;
+}
+const nearThresholdFor = (s: Settings['sensitivity']) => (s === 'strict' ? 0.5 : undefined);
+
+export function startCommentCopies(site: CopiesSite, initial: Settings): Controller {
   const cfg = config.commentCopies;
-  const flags = createCommentFlags(site.flags, cfg.minFlagCount);
+  let settings = initial;
+  const flags = createCommentFlags(site.flags, settings.mode);
+  let lastGroups: CopyGroup[] = [];
   const summary = createCopiesSummary(site.flags.where, () => site.summaryPlacement());
   let run = 0;
   let scan: Scan | null = null;
@@ -114,11 +129,15 @@ export function startCommentCopies(site: CopiesSite): Controller {
   };
 
   const applyGroups = (s: Scan, groups: CopyGroup[], ms: number) => {
+    lastGroups = groups;
+    const kept = groups.filter((g) => keepGroup(g, settings.sensitivity));
     const byId = new Map<string, CopyGroup>();
-    for (const g of groups) for (const id of g.ids) byId.set(id, g);
+    for (const g of kept) for (const id of g.ids) byId.set(id, g);
     flags.update(byId);
+    s.status.repeats = kept.reduce((a, g) => a + g.ids.length, 0);
+    s.status.repeatGroups = kept.length;
     summary.update({
-      groups: groups.filter((g) => g.ids.length >= cfg.minFlagCount),
+      groups: kept,
       loaded: s.comments.length,
       loading: !s.finalApplied,
       sampleOf: (cid) => s.seen.get(cid)?.text,
@@ -187,15 +206,16 @@ export function startCommentCopies(site: CopiesSite): Controller {
       send({ type: 'copies/add', run: s.run, comments: s.comments.slice(s.sent) });
       s.sent = s.comments.length;
     }
+    const nearThreshold = nearThresholdFor(settings.sensitivity);
     if (final) {
-      send({ type: 'copies/group', run: s.run, final: true });
+      send({ type: 'copies/group', run: s.run, final: true, nearThreshold });
       return;
     }
     const now = Date.now();
     if (busy || now - lastGroup < cfg.liveRegroupMs) return;
     lastGroup = now;
     busy = true;
-    send({ type: 'copies/group', run: s.run, final: false });
+    send({ type: 'copies/group', run: s.run, final: false, nearThreshold });
   }
 
   async function start(id: string) {
@@ -205,7 +225,7 @@ export function startCommentCopies(site: CopiesSite): Controller {
     summary.clear();
     const status: CopiesStatus = {
       site: site.name, pageId: id, phase: 'loading', source: site.tryApi ? 'api' : site.ownSource, apiNote: null,
-      comments: 0, replies: 0, groups: 0, inGroups: 0, biggest: 0,
+      comments: 0, replies: 0, groups: 0, inGroups: 0, repeats: 0, repeatGroups: 0, biggest: 0,
       onPage: 0, withId: 0, inGroupsOnPage: 0, flagged: 0, noHeader: 0,
       fetch: { requests: 0, retries: 0, lastStatus: null, lastError: null },
       lastGroupMs: 0, secs: 0, updatedAt: Date.now(),
@@ -277,8 +297,18 @@ export function startCommentCopies(site: CopiesSite): Controller {
   check();
 
   return {
-    update() {
-      /* only on/off matters, handled by the caller */
+    // Same switches as search results: Dim/Hide applies to flagged comments, Sensitivity to which groups count.
+    update(next) {
+      const prev = settings;
+      settings = next;
+      flags.setMode(next.mode);
+      if (next.sensitivity === prev.sensitivity || !scan) return;
+      if ((next.sensitivity === 'strict') !== (prev.sensitivity === 'strict') && scan.finalApplied) {
+        regroup(true); // near-copy threshold changed: group again in the worker
+      } else if (scan.finalApplied || lastGroups.length) {
+        applyGroups(scan, lastGroups, scan.status.lastGroupMs);
+        pushStatus(true);
+      }
     },
     destroy() {
       destroyed = true;
