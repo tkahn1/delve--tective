@@ -4,8 +4,16 @@ import type { ResultVerdict, SearchCheckResponse, Settings } from '../engine/mes
 import { fillReason } from '../reasons/templates';
 import { ensurePageStyle, removePageStyle } from '../ui/shadow';
 import { createHiddenLine, createReasonLine, createSummaryBar, type HiddenLine, type SummaryBar } from '../ui/summaryBar';
-import { findResults, type ResultEl } from './engines/google';
-import { queryOf } from './urlmap';
+import { findBingResults, findYahooResults } from './engines/bing';
+import { findResults as findGoogleResults, type ResultEl } from './engines/google';
+import { queryOf, type EngineId } from './urlmap';
+
+// Per-engine: how to find results, where to put the summary bar, what to watch for new results.
+const ENGINES: Record<EngineId, { find(d: Document): ResultEl[]; anchor: string; root: string }> = {
+  google: { find: findGoogleResults, anchor: '#rso', root: '#search, #rcnt' },
+  bing: { find: findBingResults, anchor: '#b_results', root: '#b_content, #b_results' },
+  yahoo: { find: findYahooResults, anchor: '#web', root: '#results, #web' },
+};
 
 export interface Controller {
   update(s: Settings): void;
@@ -21,7 +29,8 @@ interface Item {
 
 const DEBOUNCE_MS = 250;
 
-export function startSearch(url: string, initial: Settings): Controller {
+export function startSearch(url: string, initial: Settings, engineId: EngineId = 'google'): Controller {
+  const engine = ENGINES[engineId];
   let settings = initial;
   let destroyed = false;
   const query = queryOf(url);
@@ -102,7 +111,7 @@ export function startSearch(url: string, initial: Settings): Controller {
         });
       }
       if (!bar.host.isConnected) {
-        const anchor = document.querySelector('#rso') ?? items[0]?.res.container;
+        const anchor = document.querySelector(engine.anchor) ?? items[0]?.res.container;
         anchor?.parentElement?.insertBefore(bar.host, anchor);
       }
       bar.update(n, items.length, settings.mode);
@@ -114,7 +123,7 @@ export function startSearch(url: string, initial: Settings): Controller {
 
   async function scan() {
     if (destroyed) return;
-    const all = findResults(document);
+    const all = engine.find(document);
     const fresh = all.filter((r) => !seenContainers.has(r.container) && !seenUrls.has(r.url));
     if (!fresh.length) return;
     for (const r of fresh) {
@@ -151,7 +160,7 @@ export function startSearch(url: string, initial: Settings): Controller {
     clearTimeout(timer);
     timer = window.setTimeout(() => void scan(), DEBOUNCE_MS);
   });
-  const obsRoot = document.querySelector('#search') ?? document.querySelector('#rcnt') ?? document.body;
+  const obsRoot = document.querySelector(engine.root) ?? document.body;
   if (obsRoot) observer.observe(obsRoot, { childList: true, subtree: true });
 
   void scan();

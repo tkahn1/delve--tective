@@ -3,7 +3,7 @@ import { DEFAULT_SETTINGS, type Settings, type SettingsChangedMsg } from '../eng
 import { registrableDomain } from '../util/domain';
 import { startPage } from './page';
 import { startSearch, type Controller } from './search';
-import { isGoogleSearch, resolveUrl } from './urlmap';
+import { resolveUrl, searchEngineOf } from './urlmap';
 
 function siteDisabled(s: Settings, domain: string, hostname: string): boolean {
   const list = (s.disabledSites ?? []).map((d) => d.toLowerCase().replace(/^www\./, ''));
@@ -34,7 +34,8 @@ async function main() {
     return;
   }
   const domain = registrableDomain(hostname);
-  const kind: 'search' | 'page' = isGoogleSearch(url) ? 'search' : 'page';
+  const engine = searchEngineOf(url);
+  const kind: 'search' | 'page' = engine ? 'search' : 'page';
 
   let controller: Controller | null = null;
   const apply = (s: Settings) => {
@@ -45,7 +46,7 @@ async function main() {
       return;
     }
     if (controller) controller.update(s);
-    else controller = kind === 'search' ? startSearch(url, s) : startPage(url, domain, s);
+    else controller = kind === 'search' ? startSearch(url, s, engine ?? 'google') : startPage(url, domain, s);
   };
 
   chrome.runtime.onMessage.addListener((msg: SettingsChangedMsg) => {

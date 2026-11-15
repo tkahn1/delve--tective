@@ -70,6 +70,7 @@ UI/                   # Arnav's standalone UI previews, sample dashboard, and in
 
 ## Known gotchas (updated 2026-11-14)
 
+- **Bing and Yahoo search support (2026-11-14):** `content/engines/bing.ts` (both engines), picked by `searchEngineOf()` in `content/urlmap.ts`. Bing is tested live (dims windowsforum.com for "how to fix windows update error 0x80070005"). **Yahoo is UNVERIFIED end to end:** the selectors match a live Yahoo page (inspected in a browser), but Yahoo returned HTTP 500 to automated browsers and Yahoo search was not working for Toby either, so dimming on Yahoo has not been seen working. Sponsored results are not handled on Bing/Yahoo.
 - **Site list = our `pipeline/data/sites.csv` + third-party lists in `pipeline/data/imported/`** (~2,390 domains). One imported list is GPL-3.0; see `pipeline/data/imported/NOTICE.md` before selling/licensing the list. Licence notices ship in the extension (`public/THIRD_PARTY_NOTICES.md`, `public/licenses/`).
 
 - **No live Google search reliably shows listed junk sites yet** (checked 2026-11-14 in a signed-in browser): "best coffee grinder 2026" and "best air fryer 2026" returned none of the 5 listed domains. Opening listed pages directly works (badge + outlines). Candidates seen in live air-fryer results that still need checking: us.smartcopons.com, myplanetfood.com. Recheck live results before the demo.
