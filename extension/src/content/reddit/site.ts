@@ -58,6 +58,13 @@ export const redditSite: CopiesSite = {
       stats: o.stats,
     });
   },
+  // Above the comment tree (current design) or old Reddit's comment list.
+  summaryPlacement() {
+    const tree = document.querySelector('shreddit-comment-tree') ?? document.querySelector('.commentarea > .sitetable');
+    if (tree?.parentElement) return { parent: tree.parentElement, before: tree };
+    const first = document.querySelector('shreddit-comment');
+    return first?.parentElement ? { parent: first.parentElement, before: first } : null;
+  },
   flags: {
     where: 'in this thread',
     nodes: () => document.querySelectorAll(COMMENT_SEL),

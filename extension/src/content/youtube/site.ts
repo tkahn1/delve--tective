@@ -42,6 +42,12 @@ export const youtubeSite: CopiesSite = {
       stats: o.stats,
     });
   },
+  // Under the "N Comments / Sort by" header, above the first comment.
+  summaryPlacement() {
+    const header = document.querySelector('ytd-comments ytd-comments-header-renderer')?.closest('#header')
+      ?? document.querySelector('ytd-comments #header');
+    return header?.parentElement ? { parent: header.parentElement, before: header.nextSibling } : null;
+  },
   flags: {
     where: 'on this video',
     nodes: () => document.querySelectorAll('ytd-comments ytd-comment-view-model, ytd-comments ytd-comment-renderer'),

@@ -12,6 +12,7 @@ import {
 import type { CopyGroup, VideoComment } from '../../checks/commentCopies/types';
 import { config } from '../../config/detectors.config';
 import { createCommentFlags, type FlagSite } from '../../ui/commentFlag';
+import { createCopiesSummary, type SummaryPlacement } from '../../ui/copiesSummary';
 import type { Controller } from '../search';
 
 export interface FetchOptions {
@@ -32,12 +33,14 @@ export interface CopiesSite {
   navEvent?: string;
   fetchAll(id: string, o: FetchOptions): Promise<void>;
   flags: FlagSite;
+  /** Where the summary card goes: top of the comment section. */
+  summaryPlacement(): SummaryPlacement | null;
 }
 
 interface Scan {
   run: number;
   comments: VideoComment[];
-  seen: Set<string>;
+  seen: Map<string, VideoComment>;
   sent: number;
   apiResolve: ((status: string) => void) | null;
   finalApplied: boolean;
@@ -50,6 +53,7 @@ const STATUS_EVERY_MS = 1000;
 export function startCommentCopies(site: CopiesSite): Controller {
   const cfg = config.commentCopies;
   const flags = createCommentFlags(site.flags, cfg.minFlagCount);
+  const summary = createCopiesSummary(site.flags.where, () => site.summaryPlacement());
   let run = 0;
   let scan: Scan | null = null;
   let port: chrome.runtime.Port | null = null;
@@ -113,6 +117,12 @@ export function startCommentCopies(site: CopiesSite): Controller {
     const byId = new Map<string, CopyGroup>();
     for (const g of groups) for (const id of g.ids) byId.set(id, g);
     flags.update(byId);
+    summary.update({
+      groups: groups.filter((g) => g.ids.length >= cfg.minFlagCount),
+      loaded: s.comments.length,
+      loading: !s.finalApplied,
+      sampleOf: (cid) => s.seen.get(cid)?.text,
+    });
     s.status.groups = groups.length;
     s.status.inGroups = groups.reduce((a, g) => a + g.ids.length, 0);
     s.status.biggest = groups[0]?.ids.length ?? 0;
@@ -156,7 +166,7 @@ export function startCommentCopies(site: CopiesSite): Controller {
     const s = scan!;
     for (const c of list) {
       if (!c.id || s.seen.has(c.id)) continue;
-      s.seen.add(c.id);
+      s.seen.set(c.id, c);
       s.comments.push(c);
       if (c.reply) s.status.replies++;
       else s.status.comments++;
@@ -192,6 +202,7 @@ export function startCommentCopies(site: CopiesSite): Controller {
     const myRun = ++run;
     const live = () => myRun === run && !destroyed;
     flags.clear();
+    summary.clear();
     const status: CopiesStatus = {
       site: site.name, pageId: id, phase: 'loading', source: site.tryApi ? 'api' : site.ownSource, apiNote: null,
       comments: 0, replies: 0, groups: 0, inGroups: 0, biggest: 0,
@@ -199,7 +210,7 @@ export function startCommentCopies(site: CopiesSite): Controller {
       fetch: { requests: 0, retries: 0, lastStatus: null, lastError: null },
       lastGroupMs: 0, secs: 0, updatedAt: Date.now(),
     };
-    const s: Scan = { run: myRun, comments: [], seen: new Set(), sent: 0, apiResolve: null, finalApplied: false, status, t0: Date.now() };
+    const s: Scan = { run: myRun, comments: [], seen: new Map(), sent: 0, apiResolve: null, finalApplied: false, status, t0: Date.now() };
     scan = s;
     pushStatus(true);
 
@@ -257,6 +268,7 @@ export function startCommentCopies(site: CopiesSite): Controller {
     run++; // stops any scan in flight
     scan = null;
     flags.clear();
+    summary.clear();
     if (id) void start(id);
     else send({ type: 'copies/status', status: null });
   };
@@ -275,6 +287,7 @@ export function startCommentCopies(site: CopiesSite): Controller {
       window.clearInterval(poll);
       window.clearTimeout(statusTimer);
       flags.destroy();
+      summary.destroy();
       try {
         port?.disconnect();
       } catch {

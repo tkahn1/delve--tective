@@ -111,3 +111,22 @@ export const COPY_TIP_CSS = `
 .tip .r { margin: 0 0 6px; color: #FFFFFF; }
 .tip .fine { color: #A1A1AA; font-size: 10.5px; margin: 0; }
 `;
+
+/** Card at the top of a comment section: the most repeated comments on the page. */
+export const COPIES_SUMMARY_CSS = `
+.card { background: ${C.flagTint}; color: ${C.ink}; border: 1px solid ${C.border}; border-radius: 10px;
+  padding: 12px 14px; margin: 0 0 16px; max-width: 760px; }
+.head { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+.head h2 { font-family: ${FONT_HEAD}; font-weight: 600; font-size: 14px; margin: 0; color: ${C.ink}; }
+.sum { font-size: 12.5px; color: ${C.secondary}; margin: 2px 0 8px; }
+.sum b { font-family: ${FONT_HEAD}; font-weight: 600; color: ${C.flagText}; }
+.x { color: ${C.secondary2}; width: 28px; height: 28px; margin: -6px -8px 0 0; display: grid; place-items: center; border-radius: 6px; flex: none; }
+.x:hover { background: ${C.soft}; }
+.list { list-style: none; margin: 0; padding: 0; }
+.list li { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 2px 10px; align-items: baseline;
+  padding: 6px 0; border-top: 1px solid ${C.border}; }
+.n { font-family: ${FONT_HEAD}; font-weight: 600; font-size: 13px; color: ${C.flagText}; min-width: 34px; }
+.txt { font-size: 13px; color: ${C.ink}; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.meta { grid-column: 2; font-size: 11.5px; color: ${C.dimmed}; }
+.fine { font-size: 11px; color: ${C.dimmed}; margin: 8px 0 0; }
+`;
