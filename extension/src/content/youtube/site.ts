@@ -21,6 +21,7 @@ function idOf(node: Element): string | null {
 export const youtubeSite: CopiesSite = {
   name: 'YouTube',
   tryApi: true,
+  ownSource: 'page',
   navEvent: 'yt-navigate-finish',
   pageId(href) {
     try {
@@ -38,6 +39,7 @@ export const youtubeSite: CopiesSite = {
       replyWorkers: cfg.replyWorkers,
       isLive: o.isLive,
       onComments: o.onComments,
+      stats: o.stats,
     });
   },
   flags: {

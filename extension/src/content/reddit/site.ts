@@ -40,6 +40,7 @@ function headerOf(node: Element): Element | null {
 export const redditSite: CopiesSite = {
   name: 'Reddit',
   tryApi: false,
+  ownSource: 'json',
   pageId(href) {
     try {
       return new URL(href).pathname.match(/\/comments\/([a-z0-9]+)/i)?.[1]?.toLowerCase() ?? null;
@@ -54,6 +55,7 @@ export const redditSite: CopiesSite = {
       workers: cfg.redditWorkers,
       isLive: o.isLive,
       onComments: o.onComments,
+      stats: o.stats,
     });
   },
   flags: {

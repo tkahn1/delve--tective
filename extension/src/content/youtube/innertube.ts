@@ -3,6 +3,7 @@
 // Top-level pages are a chain (each page holds the link to the next) read in "Newest first" order, because
 // "Top comments" stops after a few hundred on big videos. Reply threads are fetched in parallel alongside.
 // Undocumented interface: a YouTube change can break it. TODO(hack): no automated test against live YouTube.
+import type { FetchStats } from '../../checks/commentCopies/messages';
 import type { VideoComment } from '../../checks/commentCopies/types';
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -103,6 +104,7 @@ export interface InnertubeOptions {
   replyWorkers: number;
   isLive(): boolean;
   onComments(comments: VideoComment[]): void;
+  stats?: FetchStats;
   onProgress?(p: { total: number | null; threadsDone: number; threadsTotal: number }): void;
 }
 
@@ -117,6 +119,7 @@ export async function fetchAllComments(videoId: string, o: InnertubeOptions): Pr
       const wait = coolUntil - Date.now();
       if (wait > 0) await sleep(wait);
       let res: Response | null = null;
+      if (o.stats) o.stats.requests++;
       try {
         res = await fetch('/youtubei/v1/next?prettyPrint=false', {
           method: 'POST',
@@ -124,12 +127,16 @@ export async function fetchAllComments(videoId: string, o: InnertubeOptions): Pr
           headers: { 'content-type': 'application/json' },
           body: JSON.stringify({ context, ...body }),
         });
+        if (o.stats) o.stats.lastStatus = res.status;
         if (res.ok) return (await res.json()) as Json;
       } catch {
         /* network error: retry below */
       }
       const retryable = !res || res.status === 429 || res.status >= 500;
-      if (!retryable || attempt >= 4) throw new Error(res ? `HTTP ${res.status}` : 'network error');
+      const why = res ? `HTTP ${res.status}` : 'network error';
+      if (o.stats) o.stats.lastError = why;
+      if (!retryable || attempt >= 4) throw new Error(why);
+      if (o.stats) o.stats.retries++;
       coolUntil = Math.max(coolUntil, Date.now() + 500 * 2 ** attempt);
     }
   };

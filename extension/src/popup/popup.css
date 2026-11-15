@@ -127,3 +127,9 @@ body{width:360px;background:#faf7f1;font-size:13px}.header{padding:14px 20px;min
 /* Developer: YouTube API key in use or not (comment copies) */
 .dev-row{padding-top:12px;padding-bottom:10px}.dev-row .label{margin-bottom:2px}.dev-title{font-size:12px;font-weight:500}.dev-row .switch{min-height:36px}.switch input:disabled+.track{opacity:.45;cursor:not-allowed}
 .dev-chevron{transition:transform .15s}#dev-link[aria-expanded=true] .dev-chevron{transform:rotate(90deg)}.dev-row{border-top:0;padding-top:0;padding-bottom:12px;background:#faf7f1}
+/* Repeated comments (comment copies) */
+.copies-head{margin:0;font-size:14px;font-weight:600;color:var(--ink)}.copies-head b{font-family:'Space Grotesk',Inter,sans-serif;font-weight:600;color:var(--flag-text)}
+.dev-sub{margin:14px 0 6px}
+.metrics{display:grid;grid-template-columns:auto 1fr;gap:3px 12px;margin:0;font-size:11px;line-height:1.45}
+.metrics dt{color:var(--dimmed)}.metrics dd{margin:0;color:var(--ink);font-variant-numeric:tabular-nums;word-break:break-word}
+.metrics dd.warn{color:var(--flag-text);font-weight:600}

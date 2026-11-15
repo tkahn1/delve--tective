@@ -5,6 +5,7 @@
 //   3. <origin>/comments/<postId>/_/<id>.json "continue this thread" placeholders (deep reply chains).
 // Reddit rate-limits these, so few requests run at once and a 429 waits out Reddit's reset time.
 // TODO(hack): written against Reddit's documented JSON shape; not yet run against live Reddit.
+import type { FetchStats } from '../../checks/commentCopies/messages';
 import type { VideoComment } from '../../checks/commentCopies/types';
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -41,6 +42,7 @@ export interface RedditFetchOptions {
   workers: number;
   isLive(): boolean;
   onComments(comments: VideoComment[]): void;
+  stats?: FetchStats;
 }
 
 export async function fetchRedditComments(postId: string, o: RedditFetchOptions): Promise<void> {
@@ -51,14 +53,19 @@ export async function fetchRedditComments(postId: string, o: RedditFetchOptions)
       const wait = coolUntil - Date.now();
       if (wait > 0) await sleep(wait);
       let res: Response | null = null;
+      if (o.stats) o.stats.requests++;
       try {
         res = await fetch(`${origin}${path}`, { credentials: 'include', headers: { accept: 'application/json' } });
+        if (o.stats) o.stats.lastStatus = res.status;
         if (res.ok) return (await res.json()) as Json;
       } catch {
         /* network error */
       }
       const retryable = !res || res.status === 429 || res.status >= 500;
-      if (!retryable || attempt >= 4) throw new Error(res ? `HTTP ${res.status}` : 'network error');
+      const why = res ? `HTTP ${res.status}` : 'network error';
+      if (o.stats) o.stats.lastError = why;
+      if (!retryable || attempt >= 4) throw new Error(why);
+      if (o.stats) o.stats.retries++;
       // Reddit says when the limit resets (seconds); otherwise back off 1 s, 2 s, 4 s, 8 s.
       const reset = Number(res?.headers.get('x-ratelimit-reset') ?? res?.headers.get('retry-after'));
       coolUntil = Math.max(coolUntil, Date.now() + (reset > 0 ? Math.min(reset, 60) * 1000 : 1000 * 2 ** attempt));

@@ -5,7 +5,7 @@
 //     YouTube's own page requests.
 // Separate from combine/stats like group detection: nothing is recorded, everything is per tab and in memory.
 import { groupComments } from '../checks/commentCopies/group';
-import { COMMENT_COPIES_PORT, YT_STORAGE, type CopiesRequest, type CopiesResponse } from '../checks/commentCopies/messages';
+import { COMMENT_COPIES_PORT, YT_STORAGE, copiesStatusKey, type CopiesRequest, type CopiesResponse } from '../checks/commentCopies/messages';
 import type { VideoComment } from '../checks/commentCopies/types';
 import { config } from '../config/detectors.config';
 
@@ -128,12 +128,19 @@ export function registerCommentCopies(): void {
   chrome.runtime.onConnect.addListener((port) => {
     if (port.name !== COMMENT_COPIES_PORT) return;
     const ctx: TabCtx = { port, run: null, apiRun: null, comments: [] };
+    const tabId = port.sender?.tab?.id;
     port.onDisconnect.addListener(() => {
       ctx.apiRun = null;
       ctx.comments = [];
+      if (tabId != null) void chrome.storage.session.remove(copiesStatusKey(tabId)).catch(() => {});
     });
     port.onMessage.addListener((msg: CopiesRequest) => {
       switch (msg?.type) {
+        case 'copies/status': // for the popup
+          if (tabId == null) break;
+          if (msg.status) void chrome.storage.session.set({ [copiesStatusKey(tabId)]: msg.status }).catch(() => {});
+          else void chrome.storage.session.remove(copiesStatusKey(tabId)).catch(() => {});
+          break;
         case 'copies/reset': // new video
           ctx.run = msg.run;
           ctx.comments = [];

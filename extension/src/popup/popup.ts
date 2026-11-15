@@ -11,7 +11,7 @@ import { fillReason, capitalize } from '../reasons/templates';
 import { summarize, type Stats } from '../storage/stats';
 import { registrableDomain } from '../util/domain';
 import { logoTile, chevronIcon } from '../ui/icons';
-import { YT_STORAGE } from '../checks/commentCopies/messages';
+import { YT_STORAGE, copiesStatusKey, type CopiesStatus } from '../checks/commentCopies/messages';
 
 const $ = <T extends HTMLElement = HTMLElement>(id: string): T => document.getElementById(id) as T;
 
@@ -225,6 +225,7 @@ async function init(): Promise<void> {
     if (area === 'local' && (changes[YT_STORAGE.apiKey] || changes[YT_STORAGE.useApi])) void refreshYtApi();
     if (area === 'local' && changes.stats) void refreshStats();
     if (area === 'session' && activeTabId != null && changes[`tab:${activeTabId}`]) void refreshPage();
+    if (area === 'session' && activeTabId != null && changes[copiesStatusKey(activeTabId)]) void refreshCopies();
   });
 
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
@@ -234,7 +235,64 @@ async function init(): Promise<void> {
   const s = await send<Settings>({ type: 'settings/get' });
   if (s) settings = s;
   renderSettings();
-  await Promise.all([refreshPage(), refreshStats()]);
+  await Promise.all([refreshPage(), refreshStats(), refreshCopies()]);
+}
+
+// ---------- Repeated comments (comment copies) ----------
+const SOURCE_LABEL: Record<CopiesStatus['source'], string> = {
+  api: 'YouTube Data API (100 per page)',
+  page: 'YouTube page requests (20 per page)',
+  json: 'Reddit JSON',
+};
+const NOTE_LABEL: Record<string, string> = { nokey: 'no key saved', disabled: 'off in developer options' };
+
+async function refreshCopies(): Promise<void> {
+  const st = activeTabId == null ? null
+    : ((await chrome.storage.session.get(copiesStatusKey(activeTabId)))[copiesStatusKey(activeTabId)] as CopiesStatus | undefined) ?? null;
+  renderCopies(st);
+}
+
+function renderCopies(st: CopiesStatus | null): void {
+  const section = $('copies');
+  section.hidden = !st;
+  const metrics = $('copies-metrics');
+  metrics.textContent = '';
+  const row = (k: string, v: string, warn = false) => {
+    metrics.append(el('dt', '', k));
+    metrics.append(el('dd', warn ? 'warn' : '', v));
+  };
+  if (!st) {
+    row('Status', 'Not running on this tab (YouTube videos and Reddit threads only)');
+    return;
+  }
+  const n = (x: number) => x.toLocaleString();
+  const loaded = st.comments + st.replies;
+  const where = st.site === 'Reddit' ? 'thread' : 'video';
+
+  // Summary
+  const head = $('copies-head');
+  head.textContent = '';
+  if (st.phase === 'stopped' && !loaded) head.append(`Couldn't load the comments on this ${where}`);
+  else if (st.inGroups) head.append(el('b', '', n(st.inGroups)), ` comments are repeats, in ${n(st.groups)} groups`);
+  else head.append(st.phase === 'loading' ? 'Checking comments…' : `No repeated comments on this ${where}`);
+  $('copies-sub').textContent =
+    st.phase === 'stopped' && st.fetch.lastError ? st.fetch.lastError
+    : st.phase === 'loading' ? `${n(loaded)} comments loaded so far`
+    : `${n(loaded)} comments checked in ${Math.round(st.secs)} s`;
+
+  // Developer metrics
+  row('Status', st.phase === 'loading' ? `loading, ${Math.round(st.secs)} s` : st.phase === 'done' ? `done in ${Math.round(st.secs)} s` : 'stopped', st.phase === 'stopped');
+  row('Site / id', `${st.site} / ${st.pageId}`);
+  row('Source', SOURCE_LABEL[st.source] + (st.apiNote ? ` (API: ${NOTE_LABEL[st.apiNote] ?? st.apiNote})` : ''));
+  row('Loaded', `${n(st.comments)} comments + ${n(st.replies)} replies`);
+  row('Requests', `${n(st.fetch.requests)}${st.fetch.retries ? `, ${n(st.fetch.retries)} retries` : ''}${st.fetch.lastStatus ? `, last HTTP ${st.fetch.lastStatus}` : ''}`,
+    !!st.fetch.lastStatus && st.fetch.lastStatus >= 400);
+  if (st.fetch.lastError) row('Last error', st.fetch.lastError, true);
+  row('Groups', `${n(st.groups)} (${n(st.inGroups)} comments, largest ${n(st.biggest)})`);
+  row('Grouping', `${n(st.lastGroupMs)} ms last pass`);
+  row('On the page', `${n(st.onPage)} comments, ${n(st.withId)} with ids`, st.onPage > 0 && st.withId === 0);
+  row('Flags', `${n(st.flagged)} of ${n(st.inGroupsOnPage)} in groups` + (st.noHeader ? `, ${n(st.noHeader)} with no place` : ''),
+    st.inGroupsOnPage > st.flagged);
 }
 
 /** Developer row: whether YouTube comment copies use the saved API key (on) or YouTube's page requests (off). */

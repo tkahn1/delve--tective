@@ -23,6 +23,12 @@
         <div id="page-body"></div>
       </section>
 
+      <section class="section" id="copies" hidden>
+        <div class="label">Repeated comments</div>
+        <p class="copies-head" id="copies-head"></p>
+        <p class="muted" id="copies-sub"></p>
+      </section>
+
       <section class="section">
         <div class="field-title">Flagged search results</div>
         <div class="segmented" role="radiogroup" aria-label="Flagged search results">
@@ -96,6 +102,8 @@
             <span class="track"><span class="thumb"></span></span>
           </label>
         </div>
+        <div class="dev-title dev-sub">Repeated comments on this tab</div>
+        <dl class="metrics" id="copies-metrics"><dt>Status</dt><dd>Not running on this tab</dd></dl>
       </section>
     </main>
     <script type="module" src="./popup.ts"></script>
